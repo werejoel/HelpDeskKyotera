@@ -16,9 +16,11 @@ namespace HelpDeskKyotera
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+
             // Register Entity Framework Core with SQL Server
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(connectionString));
+                    options.UseSqlServer(connectionString)
+                    .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning)));
 
             // Register ASP.NET Core Identity Services using AddIdentity
             builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(
@@ -45,6 +47,8 @@ namespace HelpDeskKyotera
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+
 
             var app = builder.Build();
 

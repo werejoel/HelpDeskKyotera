@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-
+namespace HelpDeskKyotera.ViewModels.Users
+{
     public class UserCreateViewModel : IValidatableObject
     {
         [Required(ErrorMessage = "First name is required.")]
@@ -57,4 +58,5 @@ using System.ComponentModel.DataAnnotations;
                     new[] { nameof(DateOfBirth) });
             }
         }
+    }
     }

@@ -79,8 +79,44 @@ namespace HelpDeskKyotera.Data
                     ModifiedOn = new DateTime(2025, 8, 4)
                 }
             );
+            // Seed default admin user and user-role mapping
+            SeedTmsData(builder);
         }
+        // Additional seeding helpers
+        private static void SeedTmsData(ModelBuilder builder)
+        {
+            var adminUserId = Guid.Parse("a1b2c3d4-e5f6-7890-1234-567890abcdef");
+            var hasher = new PasswordHasher<ApplicationUser>();
 
+            builder.Entity<ApplicationUser>().HasData(
+                new ApplicationUser
+                {
+                    Id = adminUserId,
+                    UserName = "admin@helpdsk.com",
+                    NormalizedUserName = "ADMIN@HELPDSK.COM",
+                    Email = "admin@helpdsk.com",
+                    NormalizedEmail = "ADMIN@HELPDSK.COM",
+                    EmailConfirmed = true,
+                    PasswordHash = hasher.HashPassword(null, "Admin@123"),
+                    SecurityStamp = "admin-security-stamp-fixed-value",
+                    FirstName = "System",
+                    LastName = "Administrator",
+                    PhoneNumber = "+256700000000",
+                    IsActive = true,
+                    CreatedOn = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    ModifiedOn = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                }
+            );
+
+            builder.Entity<IdentityUserRole<Guid>>().HasData(
+                new IdentityUserRole<Guid>
+                {
+                    RoleId = Guid.Parse("c8d89a25-4b96-4f20-9d79-7f8a54c5213d"),
+                    UserId = adminUserId
+                }
+            );
+        }
+          // DbSets
         public DbSet<Address> Addresses { get; set; }
     }
 }

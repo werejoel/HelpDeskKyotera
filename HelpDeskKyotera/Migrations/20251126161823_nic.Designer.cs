@@ -4,6 +4,7 @@ using HelpDeskKyotera.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HelpDeskKyotera.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251126161823_nic")]
+    partial class nic
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -226,23 +229,23 @@ namespace HelpDeskKyotera.Migrations
                         {
                             Id = new Guid("a1b2c3d4-e5f6-7890-1234-567890abcdef"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "9828cfa7-6879-4c30-9e70-4b82a9f5b1c4",
-                            CreatedOn = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "admin@helpdsk.com",
+                            ConcurrencyStamp = "987de748-f182-488c-b882-f23194ccbc1b",
+                            CreatedOn = new DateTime(2025, 11, 26, 16, 18, 21, 818, DateTimeKind.Utc).AddTicks(2817),
+                            Email = "admin@tms.com",
                             EmailConfirmed = true,
                             FirstName = "System",
                             IsActive = true,
                             LastName = "Administrator",
                             LockoutEnabled = false,
-                            ModifiedOn = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            NormalizedEmail = "ADMIN@HELPDSK.COM",
-                            NormalizedUserName = "ADMIN@HELPDSK.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEGRb7EY1haGe0NGdNTIJCU6w/hHmvjwu38RLrALxlWJCW7TN2awksUNq6QtcbPULig==",
+                            ModifiedOn = new DateTime(2025, 11, 26, 16, 18, 21, 818, DateTimeKind.Utc).AddTicks(3276),
+                            NormalizedEmail = "ADMIN@TMS.COM",
+                            NormalizedUserName = "ADMIN@TMS.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFbu5uuKBmrCwCleSZcmQ/MrYYIoOCdfx8MdulQR9oQDMmQcyOAq9BRriYL4XSKzRA==",
                             PhoneNumber = "+256700000000",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "admin-security-stamp-fixed-value",
+                            SecurityStamp = "0ddaa9ac-e1b1-4124-ad6f-926bd9c64cad",
                             TwoFactorEnabled = false,
-                            UserName = "admin@helpdsk.com"
+                            UserName = "admin@tms.com"
                         });
                 });
 

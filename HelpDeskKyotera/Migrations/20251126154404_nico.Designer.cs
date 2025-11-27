@@ -4,6 +4,7 @@ using HelpDeskKyotera.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HelpDeskKyotera.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251126154404_nico")]
+    partial class nico
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -220,30 +223,6 @@ namespace HelpDeskKyotera.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("Users", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("a1b2c3d4-e5f6-7890-1234-567890abcdef"),
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "9828cfa7-6879-4c30-9e70-4b82a9f5b1c4",
-                            CreatedOn = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "admin@helpdsk.com",
-                            EmailConfirmed = true,
-                            FirstName = "System",
-                            IsActive = true,
-                            LastName = "Administrator",
-                            LockoutEnabled = false,
-                            ModifiedOn = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            NormalizedEmail = "ADMIN@HELPDSK.COM",
-                            NormalizedUserName = "ADMIN@HELPDSK.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEGRb7EY1haGe0NGdNTIJCU6w/hHmvjwu38RLrALxlWJCW7TN2awksUNq6QtcbPULig==",
-                            PhoneNumber = "+256700000000",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "admin-security-stamp-fixed-value",
-                            TwoFactorEnabled = false,
-                            UserName = "admin@helpdsk.com"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -328,13 +307,6 @@ namespace HelpDeskKyotera.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("UserRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = new Guid("a1b2c3d4-e5f6-7890-1234-567890abcdef"),
-                            RoleId = new Guid("c8d89a25-4b96-4f20-9d79-7f8a54c5213d")
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>

@@ -24,8 +24,6 @@ namespace HelpDeskKyotera.Services
             _roleManager = roleManager;
             _dbContext = dbContext;
         }
-        // Returns a paged list of users with filter/search.
-        // Uses normalized columns (index-friendly) where possible for best performance.
         public async Task<PagedResult<UserListItemViewModel>> GetUsersAsync(UserListFilterViewModel filter)
         {
             // Normalize and clamp paging inputs to safe values

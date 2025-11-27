@@ -2,6 +2,9 @@
 using System.ComponentModel.DataAnnotations;
 
 
+namespace HelpDeskKyotera.ViewModels.Users
+{
+
     public class UserEditViewModel : IValidatableObject
     {
         [Required(ErrorMessage = "Invalid user.")]
@@ -50,3 +53,4 @@ using System.ComponentModel.DataAnnotations;
             }
         }
     }
+}

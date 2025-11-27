@@ -40,7 +40,7 @@ namespace HelpDeskKyotera.Models.Data
             {
                 foreach (var (firstName, lastName, phone) in RoleUsers[role])
                 {
-                    var email = $"{firstName.ToLower()}.{lastName.ToLower()}@dotnettutorials.net";
+                    var email = $"{firstName.ToLower()}.{lastName.ToLower()}";
                     await EnsureUserInRoleAsync(userManager, firstName, lastName, email, phone, role, DefaultPassword);
                 }
             }
