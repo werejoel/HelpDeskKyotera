@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace HelpDeskKyotera.ViewModels.Users
@@ -25,10 +27,6 @@ namespace HelpDeskKyotera.ViewModels.Users
         [Display(Name = "Phone Number")]
         public string? PhoneNumber { get; set; }
 
-        [DataType(DataType.Date)]
-        [Display(Name = "Date of Birth")]
-        public DateTime? DateOfBirth { get; set; }
-
         [Display(Name = "Active?")]
         public bool IsActive { get; set; } = true;
 
@@ -48,15 +46,13 @@ namespace HelpDeskKyotera.ViewModels.Users
         [Display(Name = "Confirm Password")]
         public string ConfirmPassword { get; set; } = null!;
 
-        // Model-level validations that are easier to express in code than attributes
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (DateOfBirth.HasValue && DateOfBirth.Value.Date > DateTime.Today)
+            // Basic password sanity check (no spaces)
+            if (!string.IsNullOrEmpty(Password) && Password.Contains(' '))
             {
-                yield return new ValidationResult(
-                    "Date of birth cannot be in the future.",
-                    new[] { nameof(DateOfBirth) });
+                yield return new ValidationResult("Password cannot contain spaces.", new[] { nameof(Password) });
             }
         }
     }
-    }
+ }

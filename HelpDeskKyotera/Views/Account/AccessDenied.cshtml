@@ -1,0 +1,94 @@
+﻿
+
+@using System.Security.Claims
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+@{
+    ViewData["Title"] = "Access Denied";
+    var returnUrl = ViewBag.ReturnUrl as string;
+    var isLocal = !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl);
+}
+
+<div class="container py-1">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            <div class="card shadow border-danger">
+                <div class="card-header text-bg-danger">
+                    <h1 class="h4 mb-0">Access Denied</h1>
+                </div>
+
+                <div class="card-body">
+                    <p class="mb-3">
+                        You’re signed in but don’t have permission to view this page.
+                    </p>
+
+                    <div class="alert alert-danger" role="alert">
+                        <div class="d-flex">
+                            <div class="me-2" aria-hidden="true"><strong>403 - Forbidden:</strong> </div>
+                            <div>
+                                If you believe this is a mistake, please contact an administrator or request access.
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (isLocal)
+                    {
+                        <p class="small text-muted mb-4">
+                            Requested URL: <code>@returnUrl</code>
+                        </p>
+                    }
+
+                    <div class="d-flex flex-wrap gap-2 justify-content-center">
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Go to Home</a>
+                        <a href="javascript:history.back();" class="btn btn-info">Go Back</a>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-danger">Switch Account</a>
+                    </div>
+
+                    @if (Env.IsDevelopment())
+                    {
+                        <hr class="my-4" />
+                        <div class="accordion" id="debugAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="dbgHeading">
+                                    <button class="accordion-button collapsed text-danger" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#dbgPanel"
+                                            aria-expanded="false" aria-controls="dbgPanel">
+                                        Debug details (Development only)
+                                    </button>
+                                </h2>
+                                <div id="dbgPanel" class="accordion-collapse collapse" aria-labelledby="dbgHeading"
+                                     data-bs-parent="#debugAccordion">
+                                    <div class="accordion-body small">
+                                        <dl class="row mb-0">
+                                            <dt class="col-sm-4">User</dt>
+                                            <dd class="col-sm-8">@User.Identity?.Name</dd>
+
+                                            <dt class="col-sm-4">Authenticated</dt>
+                                            <dd class="col-sm-8">@User.Identity?.IsAuthenticated</dd>
+
+                                            <dt class="col-sm-4">Roles</dt>
+                                            <dd class="col-sm-8">
+                                                @{
+                                                    var roles = User?.Claims
+                                                    ?.Where(c => c.Type == ClaimTypes.Role)
+                                                    ?.Select(c => c.Value)
+                                                    ?.ToArray() ?? Array.Empty<string>();
+                                                }
+                                                @((roles.Length == 0) ? "(none)" : string.Join(", ", roles))
+                                            </dd>
+
+                                            @if (isLocal)
+                                            {
+                                                <dt class="col-sm-4">Blocked URL</dt>
+                                                <dd class="col-sm-8">@returnUrl</dd>
+                                            }
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

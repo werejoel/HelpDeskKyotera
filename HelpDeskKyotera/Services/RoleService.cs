@@ -10,8 +10,8 @@ namespace HelpDeskKyotera.Services
 {
     public class RoleService : IRoleService
     {
-        private readonly RoleManager<ApplicationRole> _roleManager; // Manages roles in ASP.NET Identity
-        private readonly ApplicationDbContext _dbContext; // For direct DB access
+        private readonly RoleManager<ApplicationRole> _roleManager; 
+        private readonly ApplicationDbContext _dbContext;
         public RoleService(RoleManager<ApplicationRole> roleManager,
         ApplicationDbContext dbContext)
         {

@@ -9,20 +9,19 @@ using System.Security.Claims;
 
 namespace HelpDeskKyotera.Controllers
 {
-   
+
     [Authorize]
     public class UsersController : Controller
     {
         private readonly IUserService _userService;
         private readonly ILogger<UsersController> _logger;
-
         public UsersController(IUserService userService, ILogger<UsersController> logger)
         {
             _userService = userService;
             _logger = logger;
         }
-
-        // GET: /Users
+        // Any authenticated user (no specific role required)
+        // [Authorize] // (redundant; covered by class-level)
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery] UserListFilterViewModel filter)
         {
@@ -40,15 +39,15 @@ namespace HelpDeskKyotera.Controllers
                 return View(new PagedResult<UserListItemViewModel>()); // empty model to avoid null view
             }
         }
-
-        // GET: /Users/Create
+        // Requires single role: Admin
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Create()
         {
             return View(new UserCreateViewModel());
         }
-
-        // POST: /Users/Create
+        // Requires single role: Admin
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(UserCreateViewModel model)
@@ -57,14 +56,12 @@ namespace HelpDeskKyotera.Controllers
             {
                 if (!ModelState.IsValid)
                     return View(model);
-
                 var (result, newId) = await _userService.CreateAsync(model);
                 if (result.Succeeded)
                 {
                     SetSuccess($"User '{model.Email}' was created successfully.");
                     return RedirectToAction(nameof(Index));
                 }
-
                 AddIdentityErrors(result);
                 return View(model);
             }
@@ -82,8 +79,9 @@ namespace HelpDeskKyotera.Controllers
                 return View(model);
             }
         }
-
-        // GET: /Users/Edit/{id}
+        // Requires multiple roles (AND): Both Admin and Ceo
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Ceo")]
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
@@ -104,8 +102,9 @@ namespace HelpDeskKyotera.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-
-        // POST: /Users/Edit
+        // Requires multiple roles (AND): Both Admin and Ceo
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Ceo")] // AND overall
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UserEditViewModel model)
@@ -114,21 +113,17 @@ namespace HelpDeskKyotera.Controllers
             {
                 if (!ModelState.IsValid)
                     return View(model);
-
                 var result = await _userService.UpdateAsync(model);
-
                 if (result.Succeeded)
                 {
                     SetSuccess("User was updated successfully.");
                     return RedirectToAction(nameof(Index));
                 }
-
                 // Detect optimistic concurrency from service error code and show friendlier message
                 if (result.Errors.Any(e => string.Equals(e.Code, "ConcurrencyFailure", StringComparison.OrdinalIgnoreCase)))
                 {
                     SetError("This user was modified by another admin. Please reload the page and try again.");
                 }
-
                 AddIdentityErrors(result);
                 return View(model);
             }
@@ -151,8 +146,8 @@ namespace HelpDeskKyotera.Controllers
                 return View(model);
             }
         }
-
-        // GET: /Users/Details/{id}
+        // Any authenticated user (no specific role required)
+        // [Authorize] // (redundant; covered by class-level)
         [HttpGet]
         public async Task<IActionResult> Details(Guid id)
         {
@@ -173,8 +168,8 @@ namespace HelpDeskKyotera.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-
-        // GET: /Users/Delete/{id}
+        // Requires single role: Admin
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> Delete(Guid id)
         {
@@ -195,25 +190,22 @@ namespace HelpDeskKyotera.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-
-        // POST: /Users/Delete/{id}
+        // Requires single role: Admin
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             if (id == Guid.Empty) return NotFound();
-
             try
             {
                 var currentUserId = Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var g) ? g : Guid.Empty;
                 var result = await _userService.DeleteAsync(id);
-
                 if (result.Succeeded)
                 {
                     SetSuccess("User was deleted successfully.");
                     return RedirectToAction(nameof(Index));
                 }
-
                 // Last Admin cannot be deleted
                 if (result.Errors.Any(e => string.Equals(e.Code, "LastAdmin", StringComparison.OrdinalIgnoreCase)))
                 {
@@ -227,7 +219,6 @@ namespace HelpDeskKyotera.Controllers
                 {
                     SetError(string.Join(" ", result.Errors.Select(e => e.Description)));
                 }
-
                 return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateException dbx)
@@ -243,8 +234,8 @@ namespace HelpDeskKyotera.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-
-        // GET: /Users/ManageRoles/{id}
+        // Requires multiple roles (OR): Admin or Ceo
+        [Authorize(Roles = "Admin,Ceo")] // OR semantics
         [HttpGet]
         public async Task<IActionResult> ManageRoles(Guid id)
         {
@@ -265,33 +256,28 @@ namespace HelpDeskKyotera.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-
-        // POST: /Users/ManageRoles
+        // Requires multiple roles (OR): Admin or Ceo
+        [Authorize(Roles = "Admin,Ceo")] // OR semantics
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> ManageRoles(UserRolesEditViewModel model)
         {
-            if (model == null || model.UserId == Guid.Empty)
-                return NotFound();
-
+            if (!ModelState.IsValid)
+                return View(model);
             try
             {
                 var selected = model.Roles.Where(r => r.IsSelected).Select(r => r.RoleId).ToList();
                 var result = await _userService.UpdateRolesAsync(model.UserId, selected);
-
                 if (result.Succeeded)
                 {
                     SetSuccess("User roles were updated successfully.");
                     return RedirectToAction(nameof(Details), new { id = model.UserId });
                 }
-
                 // Surface specific role errors cleanly
                 if (result.Errors.Any(e => string.Equals(e.Code, "RoleNotFound", StringComparison.OrdinalIgnoreCase)))
                 {
                     SetError("One or more selected roles no longer exist. Please refresh and try again.");
                 }
-
                 AddIdentityErrors(result);
-
                 // Reload editor if failed (to re-populate checkbox list accurately)
                 var userRolesEditViewModel = await _userService.GetRolesForEditAsync(model.UserId);
                 return View(userRolesEditViewModel ?? model);
@@ -311,33 +297,27 @@ namespace HelpDeskKyotera.Controllers
                 return View(vm ?? model);
             }
         }
-
         #region Helpers
-
         // Push a success message to TempData.
         private void SetSuccess(string message)
         {
             TempData["Success"] = message;
         }
-
         // Push an error message to TempData.
         private void SetError(string message)
         {
             TempData["Error"] = message;
         }
-
         // Adds IdentityResult errors into ModelState for field and model-level display.
         private void AddIdentityErrors(IdentityResult result)
         {
             if (result == null || result.Succeeded)
                 return;
-
             foreach (var e in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, e.Description);
             }
         }
-
         #endregion
     }
 }

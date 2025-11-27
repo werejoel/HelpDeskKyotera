@@ -1,5 +1,10 @@
 ﻿@{
+    
     ViewData["Title"] = ViewData["Title"] ?? "HelpDesk Kyotera";
+    bool isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
+    bool isAdmin = User?.IsInRole("Admin") ?? false;
+    bool isCeo= User?.IsInRole("Ceo") ?? false;
+    bool isStaff = isAdmin || isCeo; // Admin OR Ceo
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -33,12 +38,29 @@
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Home" asp-action="NonSecureMethod">Non Secure</a>
                     </li> *@
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Roles" asp-action="Index">Roles</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Users" asp-action="Index">Users</a>
-                    </li>
+                    <!-- Admin-only -->
+                    @if (isAdmin)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Roles" asp-action="Index">
+                                Roles
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Claims" asp-action="Index">
+                                Claims
+                            </a>
+                        </li>
+                    }
+                    <!-- Admin OR Manager -->
+                    @if (isStaff)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Users" asp-action="Index">
+                                Users
+                            </a>
+                        </li>
+                    }
                 </ul>
                 <ul class="navbar-nav mb-2 mb-lg-0">
                     @if (User.Identity?.IsAuthenticated == true)

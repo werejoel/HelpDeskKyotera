@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 
@@ -28,10 +30,6 @@ namespace HelpDeskKyotera.ViewModels.Users
         [Display(Name = "Phone Number")]
         public string? PhoneNumber { get; set; }
 
-        [DataType(DataType.Date)]
-        [Display(Name = "Date of Birth")]
-        public DateTime? DateOfBirth { get; set; }
-
         [Display(Name = "Active?")]
         public bool IsActive { get; set; }
 
@@ -45,12 +43,24 @@ namespace HelpDeskKyotera.ViewModels.Users
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (DateOfBirth.HasValue && DateOfBirth.Value.Date > DateTime.Today)
+            // Ensure FirstName isn't only whitespace
+            if (string.IsNullOrWhiteSpace(FirstName))
             {
-                yield return new ValidationResult(
-                    "Date of birth cannot be in the future.",
-                    new[] { nameof(DateOfBirth) });
+                yield return new ValidationResult("First name is required.", new[] { nameof(FirstName) });
+            }
+
+            // Email should not contain spaces
+            if (!string.IsNullOrEmpty(Email) && Email.Contains(' '))
+            {
+                yield return new ValidationResult("Email cannot contain spaces.", new[] { nameof(Email) });
+            }
+
+            // ConcurrencyStamp must be present
+            if (string.IsNullOrWhiteSpace(ConcurrencyStamp))
+            {
+                yield return new ValidationResult("Concurrency token is missing. Please reload and try again.", new[] { nameof(ConcurrencyStamp) });
             }
         }
+
     }
 }

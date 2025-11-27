@@ -1,5 +1,6 @@
 ﻿using HelpDeskKyotera.Services;
 using HelpDeskKyotera.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -15,6 +16,15 @@ namespace HelpDeskKyotera.Controllers
             _accountService = accountService;
             _logger = logger;
         }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult AccessDenied(string? returnUrl = null)
+        {
+            ViewBag.ReturnUrl = returnUrl;
+            return View();
+        }
+
 
         // GET: /Account/Register
         [HttpGet]

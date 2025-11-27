@@ -1,6 +1,5 @@
 ﻿namespace HelpDeskKyotera.ViewModels.Users
 {
-   
     public class UserDetailsViewModel
     {
         public Guid Id { get; init; }
@@ -9,12 +8,14 @@
         public string FirstName { get; init; } = string.Empty;
         public string? LastName { get; init; }
         public string? PhoneNumber { get; init; }
-        public DateTime? DateOfBirth { get; init; }
         public DateTime? LastLogin { get; init; }
         public bool IsActive { get; init; }
         public bool EmailConfirmed { get; init; }
         public DateTime? CreatedOn { get; init; }
         public DateTime? ModifiedOn { get; init; }
         public List<string> Roles { get; init; } = new();
+
+        // e.g., ["Permission: ViewUsers", "Permission: EditUser"]
+        public List<string> Claims { get; init; } = new();
     }
 }

@@ -43,11 +43,27 @@ namespace HelpDeskKyotera
                 options.TokenLifespan = TimeSpan.FromMinutes(30);
             });
 
+
+
+            // Configure the Application Cookie settings
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                // If the LoginPath isn't set, ASP.NET Core defaults the path to /Account/Login.
+                options.LoginPath = "/Account/Login"; // Set your login path here
+
+                // If the AccessDenied isn't set, ASP.NET Core defaults the path to /Account/AccessDenied
+                options.AccessDeniedPath = "/Account/AccessDenied"; // Set your access denied path here
+            });
+
+
+
+
             // Registering Custom Services
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IClaimsService, ClaimsService>();
 
 
             var app = builder.Build();

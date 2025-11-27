@@ -25,6 +25,7 @@ namespace HelpDeskKyotera.Data
             builder.Entity<IdentityUserLogin<Guid>>().ToTable("UserLogins");
             builder.Entity<IdentityRoleClaim<Guid>>().ToTable("RoleClaims");
             builder.Entity<IdentityUserToken<Guid>>().ToTable("UserTokens");
+            builder.Entity<ClaimMaster>().ToTable("ClaimMasters");
 
 
 
@@ -118,5 +119,6 @@ namespace HelpDeskKyotera.Data
         }
           // DbSets
         public DbSet<Address> Addresses { get; set; }
+        public DbSet<ClaimMaster> ClaimMasters { get; set; }
     }
 }
