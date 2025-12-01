@@ -3,8 +3,9 @@ using HelpDeskKyotera.Models;
 using HelpDeskKyotera.Services;
 using HelpDeskKyotera.ViewModels;
 using HelpDeskKyotera.ViewModels.Users;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace HelpDeskKyotera.Services
 {
@@ -15,6 +16,7 @@ namespace HelpDeskKyotera.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ApplicationDbContext _dbContext;
+
         public UserService(
         UserManager<ApplicationUser> userManager,
         RoleManager<ApplicationRole> roleManager,
@@ -147,7 +149,7 @@ namespace HelpDeskKyotera.Services
                 PhoneNumber = user.PhoneNumber,
                 IsActive = user.IsActive,
                 EmailConfirmed = user.EmailConfirmed,
-                ConcurrencyStamp = user.ConcurrencyStamp // used for optimistic concurrency in Update
+                ConcurrencyStamp = user.ConcurrencyStamp
             };
         }
         // Updates a user with optimistic concurrency check via ConcurrencyStamp.
@@ -223,8 +225,16 @@ namespace HelpDeskKyotera.Services
             var user = await _userManager.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
             if (user == null)
                 return null;
+
             // Identity API requires the user entity for role lookup
             var roles = await _userManager.GetRolesAsync(user);
+
+            var claims = await _userManager.GetClaimsAsync(user);
+            var claimTexts = claims
+                .OrderBy(c => c.Type).ThenBy(c => c.Value)
+                .Select(c => $"{c.Type}: {c.Value}")
+                .ToList();
+
             return new UserDetailsViewModel
             {
                 Id = user.Id,
@@ -238,7 +248,8 @@ namespace HelpDeskKyotera.Services
                 EmailConfirmed = user.EmailConfirmed,
                 CreatedOn = user.CreatedOn,
                 ModifiedOn = user.ModifiedOn,
-                Roles = roles.OrderBy(r => r).ToList()
+                Roles = roles.OrderBy(r => r).ToList(),
+                Claims = claimTexts
             };
         }
         // Deletes a user with a guard to prevent removing the last Admin.
@@ -401,5 +412,71 @@ namespace HelpDeskKyotera.Services
                 }
             });
         }
+
+        public async Task<UserClaimsEditViewModel?> GetClaimsForEditAsync(Guid userId)
+        {
+            var user = await _userManager.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return null;
+
+            // Get all active claims that can be assigned to Users or Both
+            var allClaims = await _dbContext.ClaimMasters
+                .AsNoTracking()
+                .Where(c => c.IsActive && (c.Category == "User" || c.Category == "Both"))
+                .OrderBy(c => c.ClaimType).ThenBy(c => c.ClaimValue)
+                .ToListAsync();
+
+            // Read current user claims from Identity
+            var currentClaims = await _userManager.GetClaimsAsync(user);
+
+            var vm = new UserClaimsEditViewModel
+            {
+                UserId = user.Id,
+                UserName = user.UserName!,
+                Claims = allClaims.Select(c => new UserClaimCheckboxItem
+                {
+                    ClaimId = c.Id,
+                    ClaimType = c.ClaimType,
+                    ClaimValue = c.ClaimValue,
+                    Category = c.Category,
+                    Description = c.Description,
+                    IsSelected = currentClaims.Any(uc => uc.Type == c.ClaimType && uc.Value == c.ClaimValue)
+                }).ToList()
+            };
+
+            return vm;
+        }
+
+        public async Task<IdentityResult> UpdateClaimsAsync(Guid userId, IEnumerable<Guid> selectedClaimIds)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+                return IdentityResult.Failed(new IdentityError { Code = "UserNotFound", Description = "User not found." });
+
+            // Only allow choosing from active ClaimMasters in Category = User or Both
+            var allowedClaims = await _dbContext.ClaimMasters
+                .Where(c => c.IsActive && (c.Category == "User" || c.Category == "Both"))
+                .ToListAsync();
+
+            //Selected Claims
+            var selected = allowedClaims.Where(c => selectedClaimIds.Contains(c.Id)).ToList();
+
+            //Current Claims
+            var currentClaims = await _userManager.GetClaimsAsync(user);
+
+            // Remove old
+            foreach (var claim in currentClaims)
+            {
+                await _userManager.RemoveClaimAsync(user, claim);
+            }
+
+            // Add selected
+            foreach (var claim in selected)
+            {
+                await _userManager.AddClaimAsync(user, new Claim(claim.ClaimType, claim.ClaimValue));
+            }
+
+            return IdentityResult.Success;
+        }
+
     }
 }

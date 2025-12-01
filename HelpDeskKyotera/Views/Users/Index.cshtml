@@ -7,13 +7,15 @@
     var filter = (UserListFilterViewModel)ViewBag.Filter;
 
     bool isAdmin = User?.IsInRole("Admin") ?? false;
-    bool isCeo = User?.IsInRole("Manager") ?? false;
-    bool isStaff = isAdmin || isCeo;           // Admin OR Manager
+    bool isCeo = User?.IsInRole("Ceo") ?? false;
+    bool isStaff = isAdmin || isCeo;           // Admin OR Ceo
     bool canCreateUser = isAdmin;                  // Create = Admin
-    bool canEditUser = isAdmin && isCeo;       // Edit = Admin AND Manager
-    bool canManageRoles = isStaff;                 // ManageRoles = Admin OR Manager
+    bool canEditUser = isAdmin && isCeo;       // Edit = Admin AND Ceo
+    bool canManageRoles = isStaff;                 // ManageRoles = Admin OR Ceo
     bool canDeleteUser = isAdmin;                  // Delete = Admin
-    bool canViewDetails = isStaff;                 // Details = Admin OR Manager
+    bool canViewDetails = isStaff;                 // Details = Admin OR Ceo
+    bool canManageClaims = isAdmin;                // ManageClaims = Admin
+
     bool showActionsCol = canViewDetails || canEditUser || canManageRoles || canDeleteUser;
 }
 
@@ -154,38 +156,43 @@
                                     @if (showActionsCol)
                                     {
                                         <td class="text-end">
-                                            @* Details: Admin OR Ceo *@
+                                            @* Details: Admin OR  Ceo *@
                                             @if (canViewDetails)
                                             {
-                                                <a asp-action="Details" asp-route-id="@u.Id"
-                                                   class="btn btn-sm btn-outline-info me-1">
+                                                <a asp-action="Details" asp-route-id="@u.Id" class="btn btn-sm btn-outline-info me-1">
                                                     <i class="bi bi-card-list me-1"></i> Details
                                                 </a>
                                             }
 
-                                            @* Edit: Admin AND Ceo *@
+                                            @* Edit: Admin AND Ceo  *@
                                             @if (canEditUser)
                                             {
-                                                <a asp-action="Edit" asp-route-id="@u.Id"
-                                                   class="btn btn-sm btn-outline-primary me-1">
+                                                <a asp-action="Edit" asp-route-id="@u.Id" class="btn btn-sm btn-outline-primary me-1">
                                                     <i class="bi bi-pencil-square me-1"></i> Edit
                                                 </a>
                                             }
 
-                                            @* Manage Roles: Admin OR Ceo *@
+                                            @* Manage Claim: Admin only *@
+                                            @if (canManageClaims)
+                                            {
+                                                <a asp-action="ManageClaims" asp-route-id="@u.Id" class="btn btn-sm btn-outline-success">
+                                                    <i class="bi bi-key me-1"></i> Claims
+                                                </a>
+
+                                            }
+
+                                            @* Manage Roles: Admin OR  Ceo  *@
                                             @if (canManageRoles)
                                             {
-                                                <a asp-action="ManageRoles" asp-route-id="@u.Id"
-                                                   class="btn btn-sm btn-outline-dark me-1">
-                                                    <i class="bi bi-shield-check me-1"></i> Manage Roles
+                                                <a asp-action="ManageRoles" asp-route-id="@u.Id" class="btn btn-sm btn-outline-dark me-1">
+                                                    <i class="bi bi-shield-check me-1"></i> Roles
                                                 </a>
                                             }
 
                                             @* Delete: Admin only *@
                                             @if (canDeleteUser)
                                             {
-                                                <a asp-action="Delete" asp-route-id="@u.Id"
-                                                   class="btn btn-sm btn-outline-danger">
+                                                <a asp-action="Delete" asp-route-id="@u.Id" class="btn btn-sm btn-outline-danger">
                                                     <i class="bi bi-trash me-1"></i> Delete
                                                 </a>
                                             }

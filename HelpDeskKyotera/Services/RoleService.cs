@@ -37,7 +37,7 @@ namespace HelpDeskKyotera.Services
             // Get current page of roles
             var items = await query
             .OrderBy(r => r.Name) // Sort alphabetically
-            .Skip((filter.PageNumber - 1) * filter.PageSize) // Skip previous pages
+            .Skip((filter.PageNumber - 1) * filter.PageSize)
             .Take(filter.PageSize) // Take only required items
             .Select(r => new RoleListItemViewModel
             {
@@ -71,7 +71,7 @@ namespace HelpDeskKyotera.Services
             {
                 Id = Guid.NewGuid(),
                 Name = model.Name.Trim(),
-                NormalizedName = model.Name.Trim().ToUpperInvariant(), // For case-insensitive comparison
+                NormalizedName = model.Name.Trim().ToUpperInvariant(),
                 Description = model.Description?.Trim(),
                 IsActive = model.IsActive,
                 CreatedOn = DateTime.UtcNow,
@@ -94,7 +94,7 @@ namespace HelpDeskKyotera.Services
                 Name = role.Name ?? string.Empty,
                 Description = role.Description,
                 IsActive = role.IsActive,
-                ConcurrencyStamp = role.ConcurrencyStamp // For concurrency checks
+                ConcurrencyStamp = role.ConcurrencyStamp
             };
         }
         // Updates an existing role.
@@ -137,7 +137,6 @@ namespace HelpDeskKyotera.Services
             role.Description = model.Description;
             role.IsActive = model.IsActive;
             role.ModifiedOn = DateTime.UtcNow;
-            // Save changes — updates ConcurrencyStamp automatically
             return await _roleManager.UpdateAsync(role);
         }
         // Deletes a role if it has no assigned users.
@@ -161,10 +160,10 @@ namespace HelpDeskKyotera.Services
             var role = await _roleManager.Roles.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id);
             if (role == null)
                 return null;
-            // Query all users in this role via junction table (IdentityUserRole)
+            // Query all users 
             var usersQuery =
-            from ur in _dbContext.Set<IdentityUserRole<Guid>>().AsNoTracking() //Left table - User Roles
-            join u in _dbContext.Set<ApplicationUser>().AsNoTracking() //Right table - Users
+            from ur in _dbContext.Set<IdentityUserRole<Guid>>().AsNoTracking()
+            join u in _dbContext.Set<ApplicationUser>().AsNoTracking()
             on ur.UserId equals u.Id
             where ur.RoleId == id
             select new UserInRoleViewModel

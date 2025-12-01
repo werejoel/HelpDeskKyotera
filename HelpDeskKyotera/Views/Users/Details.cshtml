@@ -19,17 +19,19 @@
             <h2 class="h4 fw-bold text-primary mb-1">
                 User Profile: @(!string.IsNullOrWhiteSpace(fullName) ? fullName : Model.UserName)
             </h2>
-            <p class="text-muted small mb-0">Review account details, health, and role assignments.</p>
+            <p class="text-muted small mb-0">Review account details, health, roles, and claims.</p>
         </div>
         <div class="d-flex gap-2">
-            <a asp-controller="Users" asp-action="ManageRoles" asp-route-id="@Model.Id" class="btn btn-primary">
-                <i class="bi bi-people me-1"></i> Manage Roles
+            <a asp-controller="Users" asp-action="Index" class="btn btn-info">
+                <i class="bi bi-arrow-left me-1"></i> Back to Users
             </a>
-            <a asp-controller="Users" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-info">
+
+            <a asp-controller="Users" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-success">
                 <i class="bi bi-pencil-square me-1"></i> Edit User
             </a>
-            <a asp-controller="Users" asp-action="Index" class="btn btn-dark">
-                <i class="bi bi-arrow-left me-1"></i> Back to Users
+
+            <a asp-controller="Users" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                <i class="bi bi-pencil-square me-1"></i> Delete User
             </a>
         </div>
     </div>
@@ -51,9 +53,9 @@
     }
 
     <div class="row g-3">
-        <!-- Profile & Info -->
+        <!-- Left: Profile & Info -->
         <div class="col-lg-7">
-            <div class="card border-0 shadow">
+            <div class="card border-0 shadow h-100">
                 <div class="card-header bg-dark text-white">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center gap-3">
@@ -78,7 +80,7 @@
                 </div>
 
                 <div class="card-body">
-                    <!-- Contact section -->
+                    <!-- Contact -->
                     <div class="mb-2">
                         <div class="small text-uppercase text-muted mb-2">Contact</div>
                         <ul class="list-group list-group-flush">
@@ -96,22 +98,16 @@
                                 </span>
                             </li>
                             <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                <span class="text-muted">
-                                    <i class="bi bi-telephone me-2"></i>Phone
-                                </span>
+                                <span class="text-muted"><i class="bi bi-telephone me-2"></i>Phone</span>
                                 <span>@(string.IsNullOrWhiteSpace(Model.PhoneNumber) ? "-" : Model.PhoneNumber)</span>
                             </li>
                         </ul>
                     </div>
 
-                    <!-- Account section -->
+                    <!-- Account -->
                     <div class="mt-4">
                         <div class="small text-uppercase text-muted mb-2">Account</div>
                         <ul class="list-group list-group-flush">
-                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                <span class="text-muted"><i class="bi bi-cake2 me-2"></i>Date of Birth</span>
-                                <span>@(Model.DateOfBirth?.ToString("yyyy-MM-dd") ?? "-")</span>
-                            </li>
                             <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
                                 <span class="text-muted"><i class="bi bi-box-arrow-in-right me-2"></i>Last Login</span>
                                 <span>@(Model.LastLogin?.ToString("yyyy-MM-dd HH:mm") ?? "Never")</span>
@@ -130,23 +126,24 @@
             </div>
         </div>
 
-        <!-- Roles -->
-        <div class="col-lg-5">
-            <div class="card border-0 shadow h-100">
+        <!-- Right: Roles + Claims stacked -->
+        <div class="col-lg-5 d-flex flex-column">
+            <!-- Roles -->
+            <div class="card border-0 shadow flex-fill mb-2">
                 <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                     <span class="fw-semibold">Roles & Permissions</span>
-                    <a asp-action="ManageRoles" asp-route-id="@Model.Id" class="btn btn-sm btn-primary">
-                        <i class="bi bi-people me-1"></i> Manage
+                    <a asp-action="ManageRoles" asp-route-id="@Model.Id" class="btn btn-sm btn-success">
+                        <i class="bi bi-people me-1"></i> Manage Roles
                     </a>
                 </div>
-                <div class="card-body">
+                <div class="card-body overflow-auto">
                     @if (Model.Roles == null || Model.Roles.Count == 0)
                     {
                         <div class="text-center text-muted py-3">
                             <i class="bi bi-shield-lock mb-2" style="font-size:1.4rem;"></i>
                             <div>No roles assigned</div>
                             <div class="mt-2">
-                                <a asp-action="ManageRoles" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-primary">Assign Roles</a>
+                                <a asp-action="ManageRoles" asp-route-id="@Model.Id" class="btn btn-success">Assign Roles</a>
                             </div>
                         </div>
                     }
@@ -155,8 +152,41 @@
                         <div class="d-flex flex-wrap gap-2">
                             @foreach (var role in Model.Roles.OrderBy(x => x))
                             {
-                                <span class="badge rounded-pill bg-primary">
+                                <span class="badge rounded-pill bg-primary fs-6 px-3 py-2">
                                     <i class="bi bi-shield-check me-1"></i>@role
+                                </span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Claims -->
+            <div class="card border-0 shadow flex-fill">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold">User Claims</span>
+                    <a asp-action="ManageClaims" asp-route-id="@Model.Id" class="btn btn-sm btn-success">
+                        <i class="bi bi-key me-1"></i> Manage Claims
+                    </a>
+                </div>
+                <div class="card-body overflow-auto">
+                    @if (Model.Claims == null || Model.Claims.Count == 0)
+                    {
+                        <div class="text-center text-muted py-3">
+                            <i class="bi bi-key mb-2" style="font-size:1.4rem;"></i>
+                            <div>No user claims assigned</div>
+                            <div class="mt-2">
+                                <a asp-action="ManageClaims" asp-route-id="@Model.Id" class="btn btn-sm btn-success">Assign Claims</a>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var claim in Model.Claims.OrderBy(x => x))
+                            {
+                                <span class="badge rounded-pill bg-primary fs-6 px-3 py-2">
+                                    <i class="bi bi-check2-circle me-1"></i>@claim
                                 </span>
                             }
                         </div>

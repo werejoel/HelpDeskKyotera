@@ -15,7 +15,7 @@
         public DateTime? ModifiedOn { get; init; }
         public List<string> Roles { get; init; } = new();
 
-        // e.g., ["Permission: ViewUsers", "Permission: EditUser"]
+        //["Permission: ViewUsers", "Permission: EditUser"]
         public List<string> Claims { get; init; } = new();
     }
 }

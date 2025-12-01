@@ -14,5 +14,9 @@ namespace HelpDeskKyotera.Services
         Task<IdentityResult> DeleteAsync(Guid id);
         Task<UserRolesEditViewModel?> GetRolesForEditAsync(Guid userId);
         Task<IdentityResult> UpdateRolesAsync(Guid userId, IEnumerable<Guid> selectedRoleIds);
+
+        //New Methods for User Claim Management
+        Task<UserClaimsEditViewModel?> GetClaimsForEditAsync(Guid userId);
+        Task<IdentityResult> UpdateClaimsAsync(Guid userId, IEnumerable<Guid> selectedClaimIds);
     }
 }

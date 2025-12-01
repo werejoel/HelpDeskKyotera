@@ -319,5 +319,63 @@ namespace HelpDeskKyotera.Controllers
             }
         }
         #endregion
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> ManageClaims(Guid id)
+        {
+            var userClaimsEditViewModel = await _userService.GetClaimsForEditAsync(id);
+            if (userClaimsEditViewModel == null)
+            {
+                SetError("The user was not found.");
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(userClaimsEditViewModel);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> ManageClaims(UserClaimsEditViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            try
+            {
+                var selected = model.Claims.Where(c => c.IsSelected).Select(c => c.ClaimId).ToList();
+                var result = await _userService.UpdateClaimsAsync(model.UserId, selected);
+
+                if (result.Succeeded)
+                {
+                    SetSuccess("User claims were updated successfully.");
+                    return RedirectToAction(nameof(Details), new { id = model.UserId });
+                }
+
+                // Friendly messages for validation-style failures
+                if (result.Errors.Any(e => string.Equals(e.Code, "InvalidClaimSelection", StringComparison.OrdinalIgnoreCase)))
+                    SetError("One or more selected claims are not assignable to users. Please refresh and try again.");
+
+                AddIdentityErrors(result);
+                var reload = await _userService.GetClaimsForEditAsync(model.UserId);
+                return View(reload ?? model);
+            }
+            catch (DbUpdateException dbx)
+            {
+                _logger.LogError(dbx, "DB error while updating claims for user {UserId}", model.UserId);
+                SetError("We couldn’t update claims due to a database error. Please try again.");
+                var reload = await _userService.GetClaimsForEditAsync(model.UserId);
+                return View(reload ?? model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error updating claims for user {UserId}", model.UserId);
+                SetError("An unexpected error occurred while updating claims.");
+                var reload = await _userService.GetClaimsForEditAsync(model.UserId);
+                return View(reload ?? model);
+            }
+        }
+
+
     }
 }

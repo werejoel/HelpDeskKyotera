@@ -27,13 +27,15 @@ namespace HelpDeskKyotera.Controllers
                 ViewBag.Search = search;
                 ViewBag.Category = category;
 
-                return View(result);
+                // Redirect to the Users index (preserve filters/pagination) to avoid model mismatch
+                return RedirectToAction("Index", "Users", new { search, pageNumber, pageSize });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading claims list");
                 TempData["Error"] = "Something went wrong while fetching claims.";
-                return View(new PagedResult<ClaimListItemViewModel>());
+                // Redirect to Users index on error/fallback
+                return RedirectToAction("Index", "Users");
             }
         }
 
