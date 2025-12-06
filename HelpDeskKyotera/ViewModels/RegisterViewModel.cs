@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using HelpDeskKyotera.ViewModels.Users;
 
 namespace HelpDeskKyotera.ViewModels
 {
@@ -32,6 +33,11 @@ namespace HelpDeskKyotera.ViewModels
         [Compare("Password", ErrorMessage = "Password and confirmation password do not match.")]
         [Display(Name = "Confirm Password")]
         public string ConfirmPassword { get; set; } = null!;
+
+        [Display(Name = "Select Roles")]
+        public IEnumerable<Guid>? SelectedRoleIds { get; set; } = new List<Guid>();
+
+        // For UI display purposes
+        public IEnumerable<RoleCheckboxItem> AvailableRoles { get; set; } = new List<RoleCheckboxItem>();
     }
 }
-

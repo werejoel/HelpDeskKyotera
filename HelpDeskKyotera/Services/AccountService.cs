@@ -3,6 +3,7 @@ using HelpDeskKyotera.Services;
 using HelpDeskKyotera.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using System.Text;
 
 namespace HelpDeskKyotera.Services
@@ -10,16 +11,19 @@ namespace HelpDeskKyotera.Services
     public class AccountService : IAccountService
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
 
         public AccountService(UserManager<ApplicationUser> userManager,
+                              RoleManager<ApplicationRole> roleManager,
                               SignInManager<ApplicationUser> signInManager,
                               IEmailService emailService,
                               IConfiguration configuration)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
             _signInManager = signInManager;
             _emailService = emailService;
             _configuration = configuration;
@@ -43,21 +47,44 @@ namespace HelpDeskKyotera.Services
             if (!result.Succeeded)
                 return result;
 
-            // Assign "User" role by default
-            IdentityResult roleAssignResult = await _userManager.AddToRoleAsync(user, "User");
-            if (!roleAssignResult.Succeeded)
+            // Assign selected roles or default "User" role
+            if (model.SelectedRoleIds != null && model.SelectedRoleIds.Any())
             {
-                // Handle error - optionally return this failure instead
-                // or log the issue and continue
-                return roleAssignResult;
+                // User selected specific roles
+                foreach (var roleId in model.SelectedRoleIds)
+                {
+                    var role = await _roleManager.Roles
+                        .FirstOrDefaultAsync(r => r.Id == roleId);
+
+                    if (role != null)
+                    {
+                        await _userManager.AddToRoleAsync(user, role.Name!);
+                    }
+                }
+            }
+            else
+            {
+                // Assign default "User" role
+                IdentityResult roleAssignResult = await _userManager.AddToRoleAsync(user, "User");
+                if (!roleAssignResult.Succeeded)
+                {
+                    return roleAssignResult;
+                }
             }
 
-            var token = await GenerateEmailConfirmationTokenAsync(user);
-
-            var baseUrl = _configuration["AppSettings:BaseUrl"] ?? throw new InvalidOperationException("BaseUrl is not configured.");
-            var confirmationLink = $"{baseUrl}/Account/ConfirmEmail?userId={user.Id}&token={token}";
-
-            await _emailService.SendRegistrationConfirmationEmailAsync(user.Email, user.FirstName, confirmationLink);
+            // Try to send email confirmation but don't fail registration if email sending fails
+            try
+            {
+                var token = await GenerateEmailConfirmationTokenAsync(user);
+                var baseUrl = _configuration["AppSettings:BaseUrl"] ?? "http://localhost:5128";
+                var confirmationLink = $"{baseUrl}/Account/ConfirmEmail?userId={user.Id}&token={token}";
+                await _emailService.SendRegistrationConfirmationEmailAsync(user.Email, user.FirstName, confirmationLink);
+            }
+            catch (Exception ex)
+            {
+                // Log the error but don't fail the registration
+                System.Diagnostics.Debug.WriteLine($"Email sending failed during registration: {ex.Message}");
+            }
 
             return result;
         }

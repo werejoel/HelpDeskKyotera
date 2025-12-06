@@ -1,4 +1,5 @@
 using HelpDeskKyotera.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace HelpDeskKyotera.Data
 {

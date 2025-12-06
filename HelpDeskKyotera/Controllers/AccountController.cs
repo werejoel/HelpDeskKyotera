@@ -1,7 +1,11 @@
 ﻿using HelpDeskKyotera.Services;
 using HelpDeskKyotera.ViewModels;
+using HelpDeskKyotera.ViewModels.Users;
+using HelpDeskKyotera.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace HelpDeskKyotera.Controllers
@@ -28,9 +32,25 @@ namespace HelpDeskKyotera.Controllers
 
         // GET: /Account/Register
         [HttpGet]
-        public IActionResult Register()
+        public async Task<IActionResult> Register()
         {
-            return View();
+            var model = new RegisterViewModel();
+            
+            // Get all available roles except Admin
+            using var scope = HttpContext.RequestServices.CreateScope();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+            var allRoles = await roleManager.Roles
+                .Where(r => r.Name != "Admin")
+                .ToListAsync();
+            
+            model.AvailableRoles = allRoles.Select(r => new RoleCheckboxItem 
+            { 
+                RoleId = r.Id, 
+                RoleName = r.Name ?? "", 
+                IsSelected = false 
+            }).ToList();
+            
+            return View(model);
         }
 
         // POST: /Account/Register
@@ -41,7 +61,23 @@ namespace HelpDeskKyotera.Controllers
             try
             {
                 if (!ModelState.IsValid)
+                {
+                    // Reload available roles on validation error (excluding Admin)
+                    using var scope = HttpContext.RequestServices.CreateScope();
+                    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+                    var allRoles = await roleManager.Roles
+                        .Where(r => r.Name != "Admin")
+                        .ToListAsync();
+                    
+                    model.AvailableRoles = allRoles.Select(r => new RoleCheckboxItem 
+                    { 
+                        RoleId = r.Id, 
+                        RoleName = r.Name ?? "", 
+                        IsSelected = model.SelectedRoleIds?.Contains(r.Id) ?? false 
+                    }).ToList();
+                    
                     return View(model);
+                }
 
                 var result = await _accountService.RegisterUserAsync(model);
 
@@ -50,6 +86,22 @@ namespace HelpDeskKyotera.Controllers
 
                 foreach (var error in result.Errors)
                     ModelState.AddModelError("", error.Description);
+
+                // Reload available roles on registration error (excluding Admin)
+                using (var scope = HttpContext.RequestServices.CreateScope())
+                {
+                    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+                    var allRoles = await roleManager.Roles
+                        .Where(r => r.Name != "Admin")
+                        .ToListAsync();
+                    
+                    model.AvailableRoles = allRoles.Select(r => new RoleCheckboxItem 
+                    { 
+                        RoleId = r.Id, 
+                        RoleName = r.Name ?? "", 
+                        IsSelected = model.SelectedRoleIds?.Contains(r.Id) ?? false 
+                    }).ToList();
+                }
 
                 return View(model);
             }
