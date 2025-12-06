@@ -1,42 +1,102 @@
 ﻿@model HelpDeskKyotera.Models.Department
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = Model?.Name ?? "Department Details";
 }
 
-<h1>Details</h1>
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>@Model?.Name</h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Edit" asp-route-id="@Model?.DepartmentId" class="btn btn-warning">Edit</a>
+            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
 
-<div>
-    <h4>Department</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HeadOfDepartmentId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HeadOfDepartmentId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Location)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Location.Name)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.DepartmentId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Department Information</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Department Name:</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Name)</dd>
+
+                        <dt class="col-sm-3">Description:</dt>
+                        <dd class="col-sm-9">
+                            @if (!string.IsNullOrEmpty(Model?.Description))
+                            {
+                                @Html.DisplayFor(model => model!.Description)
+                            }
+                            else
+                            {
+                                <em class="text-muted">No description provided</em>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">Location:</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Location.Name)</dd>
+
+                        <dt class="col-sm-3">Head of Department:</dt>
+                        <dd class="col-sm-9">
+                            @if (Model?.Head != null)
+                            {
+                                <span>@Model.Head.FirstName @Model.Head.LastName</span>
+                                <span class="text-muted">(@Model.Head.Email)</span>
+                            }
+                            else
+                            {
+                                <em class="text-muted">Unassigned</em>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            @if (ViewBag.Users != null && ((IEnumerable<HelpDeskKyotera.Models.ApplicationUser>)ViewBag.Users).Any())
+            {
+                <div class="card mt-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">Department Staff (@((IEnumerable<HelpDeskKyotera.Models.ApplicationUser>)ViewBag.Users).Count())</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var user in (IEnumerable<HelpDeskKyotera.Models.ApplicationUser>)ViewBag.Users)
+                                    {
+                                        <tr>
+                                            <td>@user.FirstName @user.LastName</td>
+                                            <td>@user.Email</td>
+                                            <td>
+                                                @if (user.IsActive)
+                                                {
+                                                    <span class="badge bg-success">Active</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Inactive</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
 </div>

@@ -231,6 +231,13 @@ namespace HelpDeskKyotera.Services
                     DueBy = model.DueBy
                 };
 
+                // Auto-assign to requester's department
+                var requester = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == requesterId);
+                if (requester?.DepartmentId.HasValue == true)
+                {
+                    ticket.DepartmentId = requester.DepartmentId;
+                }
+
                 _context.Tickets.Add(ticket);
                 await _context.SaveChangesAsync();
 
@@ -455,6 +462,61 @@ namespace HelpDeskKyotera.Services
             {
                 _logger.LogError(ex, $"Error deleting ticket {ticketId}");
                 return false;
+            }
+        }
+
+        public async Task<PagedResult<TicketListItemViewModel>> GetDepartmentTicketsAsync(Guid departmentId, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var query = _context.Tickets
+                    .Where(t => t.DepartmentId == departmentId)
+                    .Include(t => t.Requester)
+                    .Include(t => t.AssignedTo)
+                    .Include(t => t.Category)
+                    .Include(t => t.Priority)
+                    .Include(t => t.Status)
+                    .AsNoTracking();
+
+                var totalCount = await query.CountAsync();
+                var tickets = await query
+                    .OrderByDescending(t => t.CreatedOn)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                var items = tickets.Select(t => new TicketListItemViewModel
+                {
+                    TicketId = t.TicketId,
+                    TicketNumber = t.TicketNumber,
+                    Title = t.Title,
+                    CategoryName = t.Category.Name,
+                    PriorityName = t.Priority.Name,
+                    StatusName = t.Status.Name,
+                    RequesterName = t.Requester.FullName,
+                    AssignedToName = t.AssignedTo?.FullName,
+                    CreatedOn = t.CreatedOn,
+                    DueBy = t.DueBy
+                }).ToList();
+
+                return new PagedResult<TicketListItemViewModel>
+                {
+                    Items = items.AsReadOnly(),
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving department tickets for {departmentId}");
+                return new PagedResult<TicketListItemViewModel>
+                {
+                    Items = new List<TicketListItemViewModel>().AsReadOnly(),
+                    TotalCount = 0,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                };
             }
         }
 

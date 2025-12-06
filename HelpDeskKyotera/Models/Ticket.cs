@@ -19,6 +19,7 @@ namespace HelpDeskKyotera.Models
         public Guid RequesterId { get; set; }
         public Guid? AssignedToId { get; set; }
         public Guid? TeamId { get; set; }
+        public Guid? DepartmentId { get; set; }
 
 
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
@@ -32,6 +33,7 @@ namespace HelpDeskKyotera.Models
         public virtual ApplicationUser Requester { get; set; } = null!;
         public virtual ApplicationUser? AssignedTo { get; set; }
         public virtual Team? Team { get; set; }
+        public virtual Department? Department { get; set; }
         public virtual Category Category { get; set; } = null!;
         public virtual Priority Priority { get; set; } = null!;
         public virtual Status Status { get; set; } = null!;

@@ -1,0 +1,185 @@
+@{
+    ViewData["Title"] = "Data Seeding";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="mb-4">
+                <i class="bi bi-database"></i> Data Seeding Management
+            </h1>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>Data seeding</strong> is a process to populate your database with initial data. Click the buttons below to seed different types of data:
+                    </p>
+                    <ul class="mb-0">
+                        <li><strong>Seed Users:</strong> Creates dummy user accounts for testing</li>
+                        <li><strong>Seed Claims:</strong> Populates permission claims for role-based access control</li>
+                        <li><strong>Seed Departments:</strong> Creates organizational departments (ICT, HR, Accounts, etc.)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Seed Users Card -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-people"></i> Seed Users
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">
+                                Create dummy user accounts for testing and development purposes.
+                            </p>
+                            <p class="small text-warning mb-3">
+                                <i class="bi bi-exclamation-triangle"></i> This will only add users if none exist yet.
+                            </p>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <form method="post" asp-action="SeedDummyUsers">
+                                <button type="submit" class="btn btn-info w-100">
+                                    <i class="bi bi-plus-circle me-2"></i> Seed Users
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seed Claims Card -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-shield-check"></i> Seed Claims
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">
+                                Populate permission claims for role-based access control system.
+                            </p>
+                            <p class="small text-warning mb-3">
+                                <i class="bi bi-exclamation-triangle"></i> This will only add claims if none exist yet.
+                            </p>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <form method="post" asp-action="SeedDummyClaims">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="bi bi-plus-circle me-2"></i> Seed Claims
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seed Departments Card -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">
+                                <i class="bi bi-building"></i> Seed Departments
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">
+                                Create organizational departments including:
+                            </p>
+                            <ul class="mb-3 small">
+                                <li>Information & Communication Technology (ICT)</li>
+                                <li>Human Resource</li>
+                                <li>Accounts</li>
+                                <li>Procurement</li>
+                                <li>Administration</li>
+                                <li>Operations</li>
+                                <li>Marketing & Communications</li>
+                                <li>Research & Development</li>
+                                <li>Quality Assurance</li>
+                                <li>Customer Support</li>
+                            </ul>
+                            <p class="small text-warning mb-3">
+                                <i class="bi bi-exclamation-triangle"></i> This will only add departments if none exist yet.
+                            </p>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <form method="post" asp-action="SeedDepartments">
+                                <button type="submit" class="btn btn-warning w-100">
+                                    <i class="bi bi-plus-circle me-2"></i> Seed Departments
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seed All Card -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-lightning-charge"></i> Seed All at Once
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">
+                                Populate all data types at once: Users, Claims, and Departments.
+                            </p>
+                            <p class="small text-warning mb-3">
+                                <i class="bi bi-exclamation-triangle"></i> This will seed all data in sequence.
+                            </p>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <button type="button" class="btn btn-secondary w-100" onclick="seedAll()">
+                                <i class="bi bi-plus-circle me-2"></i> Seed All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back Button -->
+            <div class="mt-4">
+                <a asp-controller="AdminDashboard" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function seedAll() {
+        if (confirm('This will seed all data (Users, Claims, and Departments). Continue?')) {
+            // Submit all three forms in sequence
+            document.querySelectorAll('form').forEach((form, index) => {
+                setTimeout(() => {
+                    form.submit();
+                }, index * 1000); // Stagger submissions by 1 second
+            });
+        }
+    }
+</script>

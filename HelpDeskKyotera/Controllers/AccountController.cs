@@ -117,10 +117,14 @@ namespace HelpDeskKyotera.Controllers
 
                 if (result.Succeeded)
                 {
+                    // Check if user is Admin
+                    if (User.IsInRole("Admin"))
+                        return RedirectToAction("Index", "AdminDashboard");
+
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                         return Redirect(returnUrl);
 
-                    return RedirectToAction("Profile", "Account"); ;
+                    return RedirectToAction("Profile", "Account");
                 }
 
                 if (result.IsNotAllowed)

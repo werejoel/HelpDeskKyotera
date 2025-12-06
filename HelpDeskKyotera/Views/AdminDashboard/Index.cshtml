@@ -1,0 +1,374 @@
+@using HelpDeskKyotera.Controllers
+@model AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="d-flex" style="min-height: 100vh;">
+    <!-- Sidebar -->
+    <nav class="bg-dark text-white" style="width: 280px; position: fixed; height: 100vh; overflow-y: auto; z-index: 1000;">
+        <div class="p-4 border-bottom">
+            <h5 class="mb-0">
+                <i class="bi bi-shield-check"></i> Admin Panel
+            </h5>
+            <small class="text-muted">HelpDesk System</small>
+        </div>
+
+        <ul class="nav flex-column p-3">
+            <!-- Dashboard -->
+            <li class="nav-item mb-2">
+                <a class="nav-link text-white" asp-action="Index">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+
+            <!-- Users Management -->
+            <li class="nav-item mb-2">
+                <a class="nav-link text-white" asp-controller="Users" asp-action="Index">
+                    <i class="bi bi-people"></i> Users
+                </a>
+            </li>
+
+            <!-- Departments Management -->
+            <li class="nav-item mb-2">
+                <a class="nav-link text-white" asp-controller="Departments" asp-action="Index">
+                    <i class="bi bi-building"></i> Departments
+                </a>
+            </li>
+
+            <!-- Roles Management -->
+            <li class="nav-item mb-2">
+                <a class="nav-link text-white" asp-controller="Roles" asp-action="Index">
+                    <i class="bi bi-shield-lock"></i> Roles
+                </a>
+            </li>
+
+            <!-- Tickets Management -->
+            <li class="nav-item mb-2">
+                <a class="nav-link text-white" asp-controller="Tickets" asp-action="Index">
+                    <i class="bi bi-ticket"></i> All Tickets
+                </a>
+            </li>
+
+            <!-- Claims Management -->
+            <li class="nav-item mb-2">
+                <a class="nav-link text-white" asp-controller="Claims" asp-action="Index">
+                    <i class="bi bi-file-earmark"></i> Claims
+                </a>
+            </li>
+
+            <!-- Data Seeding -->
+            <li class="nav-item mb-2">
+                <a class="nav-link text-white" asp-controller="DataSeeding" asp-action="Index">
+                    <i class="bi bi-database"></i> Data Seeding
+                </a>
+            </li>
+        </ul>
+
+        <hr class="bg-secondary my-3" />
+
+        <!-- User Profile & Logout -->
+        <div class="p-3 border-top">
+            <div class="mb-3">
+                <small class="text-muted d-block mb-2">Logged in as:</small>
+                <small class="text-white">@User.Identity?.Name</small>
+            </div>
+            <form asp-controller="Account" asp-action="Logout" method="post" class="d-grid">
+                <button type="submit" class="btn btn-danger btn-sm">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main style="margin-left: 280px; width: calc(100% - 280px);">
+        <!-- Top Navigation Bar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom sticky-top">
+            <div class="container-fluid">
+                <span class="navbar-brand mb-0 h1">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </span>
+                <div class="ms-auto">
+                    <span class="text-muted">@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div class="container-fluid p-4">
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-0">Total Tickets</h6>
+                                    <h2 class="mb-0 text-primary">@Model.TotalTickets</h2>
+                                </div>
+                                <div class="ms-auto">
+                                    <i class="bi bi-ticket" style="font-size: 3rem; color: #0d6efd; opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light border-0">
+                            <a asp-controller="Tickets" asp-action="Index" class="text-decoration-none small">
+                                View all tickets <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-0">Total Departments</h6>
+                                    <h2 class="mb-0 text-success">@Model.TotalDepartments</h2>
+                                </div>
+                                <div class="ms-auto">
+                                    <i class="bi bi-building" style="font-size: 3rem; color: #198754; opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light border-0">
+                            <a asp-controller="Departments" asp-action="Index" class="text-decoration-none small">
+                                View all departments <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-0">Total Users</h6>
+                                    <h2 class="mb-0 text-info">@Model.TotalUsers</h2>
+                                </div>
+                                <div class="ms-auto">
+                                    <i class="bi bi-people" style="font-size: 3rem; color: #0dcaf0; opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light border-0">
+                            <a asp-controller="Users" asp-action="Index" class="text-decoration-none small">
+                                View all users <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Tickets Section -->
+            <div class="row mb-4">
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="mb-0">
+                                <i class="bi bi-clock-history"></i> Recent Tickets
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.RecentTickets.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Ticket #</th>
+                                                <th>Title</th>
+                                                <th>Status</th>
+                                                <th>Priority</th>
+                                                <th>Date</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var ticket in Model.RecentTickets)
+                                            {
+                                                <tr>
+                                                    <td><strong>@ticket.TicketNumber</strong></td>
+                                                    <td>@ticket.Title</td>
+                                                    <td>
+                                                        @if (ticket.Status != null)
+                                                        {
+                                                            <span class="badge bg-secondary">@ticket.Status.Name</span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-secondary">N/A</span>
+                                                    </td>
+                                                    <td><small>@ticket.CreatedOn.ToString("MMM dd, yyyy")</small></td>
+                                                    <td>
+                                                        <a asp-controller="Tickets" asp-action="Details" asp-route-id="@ticket.TicketId" class="btn btn-sm btn-outline-primary">View</a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted mb-0">No recent tickets found.</p>
+                            }
+                        </div>
+                        <div class="card-footer bg-light border-top">
+                            <a asp-controller="Tickets" asp-action="Index" class="btn btn-sm btn-outline-primary">View All Tickets</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="mb-0">
+                                <i class="bi bi-lightning"></i> Quick Actions
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a asp-controller="Users" asp-action="Create" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-person-plus"></i> Add New User
+                                </a>
+                                <a asp-controller="Departments" asp-action="Create" class="btn btn-success btn-sm">
+                                    <i class="bi bi-building"></i> Create Department
+                                </a>
+                                <a asp-controller="Roles" asp-action="Create" class="btn btn-info btn-sm">
+                                    <i class="bi bi-shield-lock"></i> Create Role
+                                </a>
+                                <a asp-controller="Tickets" asp-action="Index" class="btn btn-warning btn-sm">
+                                    <i class="bi bi-ticket"></i> Manage Tickets
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Departments List -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="mb-0">
+                                <i class="bi bi-building"></i> Departments
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.Departments.Any())
+                            {
+                                <div class="list-group list-group-flush">
+                                    @foreach (var dept in Model.Departments.Take(5))
+                                    {
+                                        <a asp-controller="Departments" asp-action="Details" asp-route-id="@dept.DepartmentId" class="list-group-item list-group-item-action py-2">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="mb-0">@dept.Name</h6>
+                                                    <small class="text-muted">@(dept.Location?.Name ?? "N/A")</small>
+                                                </div>
+                                                <span class="badge bg-light text-dark">
+                                                    @dept.Users.Count users
+                                                </span>
+                                            </div>
+                                        </a>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted mb-0">No departments available.</p>
+                            }
+                        </div>
+                        <div class="card-footer bg-light border-top">
+                            <a asp-controller="Departments" asp-action="Index" class="btn btn-sm btn-outline-primary">View All</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<style>
+    /* Smooth scrolling for sidebar */
+    nav {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.1);
+    }
+
+    nav::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    nav::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    nav::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+    }
+
+    nav::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Active link styling */
+    .nav-link {
+        transition: all 0.3s ease;
+        border-radius: 0.375rem;
+    }
+
+    .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding-left: 1.5rem;
+    }
+
+    /* Card hover effects */
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+    }
+</style>
+
+<style>
+    @@media (max-width: 768px) {
+        .d-flex {
+            flex-direction: column !important;
+        }
+
+        nav {
+            width: 100% !important;
+            position: static !important;
+            height: auto !important;
+        }
+
+        main {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+    }
+</style>

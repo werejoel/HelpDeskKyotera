@@ -63,19 +63,32 @@
             @Html.DisplayNameFor(model => model.AssignedTo)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AssignedTo.Id)
+            @if (Model?.AssignedTo != null)
+            {
+                @Html.DisplayFor(model => model.AssignedTo.Id)
+            }
+            else
+            {
+                <em>Unassigned</em>
+            }
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Team)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Team.Name)
+            @if (Model?.Team != null)
+            {
+                @Html.DisplayFor(model => model!.Team.Name)
+            }
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Category)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Category.Name)
+            @if (Model?.Category != null)
+            {
+                @Html.DisplayFor(model => model!.Category.Name)
+            }
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Priority)

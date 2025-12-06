@@ -16,6 +16,7 @@ namespace HelpDeskKyotera.Services
         Task<PagedResult<TicketListItemViewModel>> GetTicketsAsync(TicketFilterViewModel filter);
         Task<PagedResult<TicketListItemViewModel>> GetMyTicketsAsync(Guid userId, int pageNumber = 1, int pageSize = 10);
         Task<PagedResult<TicketListItemViewModel>> GetMyAssignedTicketsAsync(Guid userId, int pageNumber = 1, int pageSize = 10);
+        Task<PagedResult<TicketListItemViewModel>> GetDepartmentTicketsAsync(Guid departmentId, int pageNumber = 1, int pageSize = 10);
 
         // Status Management
         Task<(bool Success, string Message)> AssignTicketAsync(Guid ticketId, Guid? assignedToId);

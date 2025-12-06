@@ -23,9 +23,7 @@ namespace HelpDeskKyotera.Controllers
             _context = context;
             _logger = logger;
         }
-
         private Guid GetCurrentUserId() => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? Guid.Empty.ToString());
-
         // GET: Tickets/Index
         public async Task<IActionResult> Index(int pageNumber = 1, string? search = null, Guid? statusId = null, Guid? priorityId = null, Guid? categoryId = null)
         {
@@ -46,7 +44,6 @@ namespace HelpDeskKyotera.Controllers
                 var statuses = await _ticketService.GetStatusesAsync();
                 var priorities = await _ticketService.GetPrioritiesAsync();
                 var categories = await _ticketService.GetCategoriesAsync();
-
                 ViewBag.Statuses = new SelectList(statuses, "StatusId", "Name");
                 ViewBag.Priorities = new SelectList(priorities, "PriorityId", "Name");
                 ViewBag.Categories = new SelectList(categories, "CategoryId", "Name");
