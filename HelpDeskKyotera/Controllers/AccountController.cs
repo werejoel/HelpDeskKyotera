@@ -39,9 +39,13 @@ namespace HelpDeskKyotera.Controllers
             // Get all available roles except Admin
             using var scope = HttpContext.RequestServices.CreateScope();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+            var departmentService = scope.ServiceProvider.GetRequiredService<IDepartmentService>();
+            
             var allRoles = await roleManager.Roles
                 .Where(r => r.Name != "Admin")
                 .ToListAsync();
+            
+            var allDepartments = await departmentService.GetAllDepartmentsAsync();
             
             model.AvailableRoles = allRoles.Select(r => new RoleCheckboxItem 
             { 
@@ -49,6 +53,8 @@ namespace HelpDeskKyotera.Controllers
                 RoleName = r.Name ?? "", 
                 IsSelected = false 
             }).ToList();
+            
+            model.AvailableDepartments = allDepartments;
             
             return View(model);
         }
@@ -62,12 +68,16 @@ namespace HelpDeskKyotera.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    // Reload available roles on validation error (excluding Admin)
+                    // Reload available roles and departments on validation error
                     using var scope = HttpContext.RequestServices.CreateScope();
                     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+                    var departmentService = scope.ServiceProvider.GetRequiredService<IDepartmentService>();
+                    
                     var allRoles = await roleManager.Roles
                         .Where(r => r.Name != "Admin")
                         .ToListAsync();
+                    
+                    var allDepartments = await departmentService.GetAllDepartmentsAsync();
                     
                     model.AvailableRoles = allRoles.Select(r => new RoleCheckboxItem 
                     { 
@@ -75,6 +85,8 @@ namespace HelpDeskKyotera.Controllers
                         RoleName = r.Name ?? "", 
                         IsSelected = model.SelectedRoleIds?.Contains(r.Id) ?? false 
                     }).ToList();
+                    
+                    model.AvailableDepartments = allDepartments;
                     
                     return View(model);
                 }
@@ -87,13 +99,17 @@ namespace HelpDeskKyotera.Controllers
                 foreach (var error in result.Errors)
                     ModelState.AddModelError("", error.Description);
 
-                // Reload available roles on registration error (excluding Admin)
+                // Reload available roles and departments on registration error
                 using (var scope = HttpContext.RequestServices.CreateScope())
                 {
                     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+                    var departmentService = scope.ServiceProvider.GetRequiredService<IDepartmentService>();
+                    
                     var allRoles = await roleManager.Roles
                         .Where(r => r.Name != "Admin")
                         .ToListAsync();
+                    
+                    var allDepartments = await departmentService.GetAllDepartmentsAsync();
                     
                     model.AvailableRoles = allRoles.Select(r => new RoleCheckboxItem 
                     { 
@@ -101,6 +117,8 @@ namespace HelpDeskKyotera.Controllers
                         RoleName = r.Name ?? "", 
                         IsSelected = model.SelectedRoleIds?.Contains(r.Id) ?? false 
                     }).ToList();
+                    
+                    model.AvailableDepartments = allDepartments;
                 }
 
                 return View(model);

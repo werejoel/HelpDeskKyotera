@@ -4,7 +4,7 @@ namespace HelpDeskKyotera.Models.Data
 {
     public static class IdentityUserSeeder
     {
-        // Adjust this to your policy (must satisfy your password rules)
+        // Adjust this to your policy
         private const string DefaultPassword = "Test@1234";
         // Predefined dummy users for each role
         private static readonly Dictionary<string, List<(string FirstName, string LastName, string Phone)>> RoleUsers =
@@ -12,23 +12,21 @@ namespace HelpDeskKyotera.Models.Data
         {
             ["Admin"] = new List<(string, string, string)>
         {
-                ("Pranav", "Sharma", "9876543210"),
-                ("Aditi", "Verma", "9123456789"),
-                ("Rohan", "Iyer", "9988776655")
+                ("Najuko ", "Prossy", "0789251487"),
+                ("Tumwinne ", "Derrick", "0789251433"),
                 
         },
             ["Staff"] = new List<(string, string, string)>
         {
-                ("Arjun", "Mehta", "9823456780"),
-                ("Sneha", "Kapoor", "9345678901"),
-                ("Vikram", "Patel", "9456789012")
-                
+               ("Namaganda ", "Jane", "0789251357"),
+                ("Okiring ", "Samuel", "0789251425"),
+               
         },
             ["User"] = new List<(string, string, string)>
         {
-                ("Rahul", "Singh", "9789012345"),
-                ("Priya", "Menon", "9890123456"),
-                ("Siddharth", "Joshi", "9901234567")
+                ("Kapoto", "Simon", "0789251425"),
+                ("Kintu", "Viscent", "0789253546"),
+                
                
         }
         };

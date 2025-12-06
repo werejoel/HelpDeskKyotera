@@ -66,6 +66,11 @@ namespace HelpDeskKyotera.Controllers
             {
                 var allUsers = await Task.FromResult(new List<ApplicationUser>());
                 ViewBag.HeadOfDepartmentId = new SelectList(allUsers, "Id", "FullName");
+                
+                // Load locations for dropdown
+                var locations = await _departmentService.GetAllLocationsAsync();
+                ViewBag.LocationId = new SelectList(locations, "LocationId", "Name");
+                
                 return View();
             }
             catch (Exception ex)
@@ -79,17 +84,22 @@ namespace HelpDeskKyotera.Controllers
         // POST: Departments/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string name, string? description, Guid? headId)
+        public async Task<IActionResult> Create(string name, string? description, Guid? headId, Guid? locationId)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
                 ModelState.AddModelError("Name", "Department name is required.");
+                
+                // Reload locations for dropdown on error
+                var locations = await _departmentService.GetAllLocationsAsync();
+                ViewBag.LocationId = new SelectList(locations, "LocationId", "Name");
+                
                 return View();
             }
 
             try
             {
-                var (success, message, departmentId) = await _departmentService.CreateDepartmentAsync(name, description, headId);
+                var (success, message, departmentId) = await _departmentService.CreateDepartmentAsync(name, description, headId, locationId);
                 
                 if (success)
                 {
@@ -98,6 +108,11 @@ namespace HelpDeskKyotera.Controllers
                 }
 
                 TempData["Error"] = message;
+                
+                // Reload locations for dropdown on error
+                var locations = await _departmentService.GetAllLocationsAsync();
+                ViewBag.LocationId = new SelectList(locations, "LocationId", "Name");
+                
                 return View();
             }
             catch (Exception ex)
@@ -122,6 +137,10 @@ namespace HelpDeskKyotera.Controllers
 
                 var allUsers = new List<ApplicationUser>();
                 ViewBag.HeadOfDepartmentId = new SelectList(allUsers, "Id", "FullName", department.HeadOfDepartmentId);
+                
+                // Load locations for dropdown
+                var locations = await _departmentService.GetAllLocationsAsync();
+                ViewBag.LocationId = new SelectList(locations, "LocationId", "Name", department.LocationId);
 
                 return View(department);
             }
@@ -136,17 +155,22 @@ namespace HelpDeskKyotera.Controllers
         // POST: Departments/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, string name, string? description, Guid? headId)
+        public async Task<IActionResult> Edit(Guid id, string name, string? description, Guid? headId, Guid? locationId)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
                 ModelState.AddModelError("Name", "Department name is required.");
+                
+                // Reload locations for dropdown on error
+                var locations = await _departmentService.GetAllLocationsAsync();
+                ViewBag.LocationId = new SelectList(locations, "LocationId", "Name");
+                
                 return View();
             }
 
             try
             {
-                var (success, message) = await _departmentService.UpdateDepartmentAsync(id, name, description, headId);
+                var (success, message) = await _departmentService.UpdateDepartmentAsync(id, name, description, headId, locationId);
 
                 if (success)
                 {
@@ -155,6 +179,11 @@ namespace HelpDeskKyotera.Controllers
                 }
 
                 TempData["Error"] = message;
+                
+                // Reload locations for dropdown on error
+                var locations = await _departmentService.GetAllLocationsAsync();
+                ViewBag.LocationId = new SelectList(locations, "LocationId", "Name");
+                
                 return View();
             }
             catch (Exception ex)

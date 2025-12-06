@@ -39,7 +39,8 @@ namespace HelpDeskKyotera.Services
                 LastName = model.LastName,
                 IsActive = true,
                 PhoneNumber = model.PhoneNumber,
-                CreatedOn = DateTime.UtcNow
+                CreatedOn = DateTime.UtcNow,
+                DepartmentId = model.SelectedDepartmentId
             };
 
             IdentityResult result = await _userManager.CreateAsync(user, model.Password);

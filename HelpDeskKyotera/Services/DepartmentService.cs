@@ -53,7 +53,7 @@ namespace HelpDeskKyotera.Services
             }
         }
 
-        public async Task<(bool Success, string Message, Guid? DepartmentId)> CreateDepartmentAsync(string name, string? description, Guid? headId)
+        public async Task<(bool Success, string Message, Guid? DepartmentId)> CreateDepartmentAsync(string name, string? description, Guid? headId, Guid? locationId = null)
         {
             try
             {
@@ -70,7 +70,8 @@ namespace HelpDeskKyotera.Services
                     DepartmentId = Guid.NewGuid(),
                     Name = name.Trim(),
                     Description = description?.Trim(),
-                    HeadOfDepartmentId = headId
+                    HeadOfDepartmentId = headId,
+                    LocationId = locationId
                 };
 
                 _context.Departments.Add(department);
@@ -86,7 +87,7 @@ namespace HelpDeskKyotera.Services
             }
         }
 
-        public async Task<(bool Success, string Message)> UpdateDepartmentAsync(Guid departmentId, string name, string? description, Guid? headId)
+        public async Task<(bool Success, string Message)> UpdateDepartmentAsync(Guid departmentId, string name, string? description, Guid? headId, Guid? locationId = null)
         {
             try
             {
@@ -106,6 +107,7 @@ namespace HelpDeskKyotera.Services
                 department.Name = name.Trim();
                 department.Description = description?.Trim();
                 department.HeadOfDepartmentId = headId;
+                department.LocationId = locationId;
 
                 _context.Departments.Update(department);
                 await _context.SaveChangesAsync();
@@ -318,6 +320,22 @@ namespace HelpDeskKyotera.Services
             {
                 _logger.LogError(ex, $"Error retrieving available staff for department {departmentId}");
                 return Enumerable.Empty<ApplicationUser>();
+            }
+        }
+
+        public async Task<IEnumerable<Location>> GetAllLocationsAsync()
+        {
+            try
+            {
+                return await _context.Locations
+                    .AsNoTracking()
+                    .OrderBy(l => l.Name)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving all locations");
+                return Enumerable.Empty<Location>();
             }
         }
     }

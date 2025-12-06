@@ -136,6 +136,42 @@
                     </div>
                 </div>
 
+                <!-- Seed Locations Card -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-geo-alt"></i> Seed Locations
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">
+                                Create location/level entries for departments:
+                            </p>
+                            <ul class="mb-3 small">
+                                <li>Level 1 - Ground Floor (Main Building)</li>
+                                <li>Level 2 - First Floor (Main Building)</li>
+                                <li>Level 3 - Second Floor (Main Building)</li>
+                                <li>Level 4 - Third Floor (Main Building)</li>
+                                <li>Level 5 - First Floor (Admin Building)</li>
+                                <li>Level 6 - Second Floor (Admin Building)</li>
+                                <li>Level 7 - Ground Floor (Operations Building)</li>
+                                <li>Level 8 - First Floor (Operations Building)</li>
+                            </ul>
+                            <p class="small text-warning mb-3">
+                                <i class="bi bi-exclamation-triangle"></i> This will only add locations if none exist yet.
+                            </p>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <form method="post" asp-action="SeedLocations">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-plus-circle me-2"></i> Seed Locations
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Seed All Card -->
                 <div class="col-md-6 mb-4">
                     <div class="card h-100 border-0 shadow-sm">

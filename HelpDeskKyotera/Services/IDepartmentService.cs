@@ -8,8 +8,8 @@ namespace HelpDeskKyotera.Services
         // Department CRUD
         Task<Department?> GetDepartmentByIdAsync(Guid departmentId);
         Task<IEnumerable<Department>> GetAllDepartmentsAsync();
-        Task<(bool Success, string Message, Guid? DepartmentId)> CreateDepartmentAsync(string name, string? description, Guid? headId);
-        Task<(bool Success, string Message)> UpdateDepartmentAsync(Guid departmentId, string name, string? description, Guid? headId);
+        Task<(bool Success, string Message, Guid? DepartmentId)> CreateDepartmentAsync(string name, string? description, Guid? headId, Guid? locationId = null);
+        Task<(bool Success, string Message)> UpdateDepartmentAsync(Guid departmentId, string name, string? description, Guid? headId, Guid? locationId = null);
         Task<bool> DeleteDepartmentAsync(Guid departmentId);
 
         // Department Users
@@ -21,5 +21,8 @@ namespace HelpDeskKyotera.Services
         Task<PagedResult<dynamic>> GetDepartmentTicketsAsync(Guid departmentId, int pageNumber = 1, int pageSize = 10);
         Task<(bool Success, string Message)> AssignTicketToDepartmentAsync(Guid ticketId, Guid departmentId);
         Task<IEnumerable<ApplicationUser>> GetAvailableStaffForDepartmentAsync(Guid departmentId);
+
+        // Locations
+        Task<IEnumerable<Location>> GetAllLocationsAsync();
     }
 }

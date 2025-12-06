@@ -70,5 +70,21 @@ namespace HelpDeskKyotera.Controllers
             }
             return RedirectToAction("Index");
         }
+
+        [HttpPost("seed-locations")]
+        public async Task<IActionResult> SeedLocations()
+        {
+            try
+            {
+                await LocationSeeder.SeedLocationsAsync(_services);
+                TempData["Success"] = "Locations have been seeded successfully.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error seeding locations");
+                TempData["Error"] = $"Error seeding locations: {ex.Message}";
+            }
+            return RedirectToAction("Index");
+        }
     }
 }

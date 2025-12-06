@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using HelpDeskKyotera.ViewModels.Users;
+using HelpDeskKyotera.Models;
 
 namespace HelpDeskKyotera.ViewModels
 {
@@ -37,7 +38,11 @@ namespace HelpDeskKyotera.ViewModels
         [Display(Name = "Select Roles")]
         public IEnumerable<Guid>? SelectedRoleIds { get; set; } = new List<Guid>();
 
+        [Display(Name = "Select Department")]
+        public Guid? SelectedDepartmentId { get; set; }
+
         // For UI display purposes
         public IEnumerable<RoleCheckboxItem> AvailableRoles { get; set; } = new List<RoleCheckboxItem>();
+        public IEnumerable<Department> AvailableDepartments { get; set; } = new List<Department>();
     }
 }

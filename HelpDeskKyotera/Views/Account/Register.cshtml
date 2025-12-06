@@ -71,6 +71,21 @@
                     </div>
                 </div>
 
+                <!-- Department Selection -->
+                @if (Model.AvailableDepartments.Any())
+                {
+                    <div class="mb-3">
+                        <label asp-for="SelectedDepartmentId" class="form-label">Select Department <span class="text-muted small">(Optional)</span></label>
+                        <select asp-for="SelectedDepartmentId" class="form-control">
+                            <option value="">-- Select a department --</option>
+                            @foreach (var dept in Model.AvailableDepartments)
+                            {
+                                <option value="@dept.DepartmentId">@dept.Name</option>
+                            }
+                        </select>
+                    </div>
+                }
+
                 <!-- Role Selection -->
                 @if (Model.AvailableRoles.Any())
                 {
