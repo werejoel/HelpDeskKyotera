@@ -1,0 +1,355 @@
+﻿@using HelpDeskKyotera.ViewModels.Tickets
+@model TicketDetailsViewModel
+
+@{
+    ViewData["Title"] = $"Ticket {Model.TicketNumber}";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h3 class="mb-0">@Model.TicketNumber</h3>
+                            <h5 class="mb-0 mt-2">@Model.Title</h5>
+                        </div>
+                        <span class="badge bg-warning text-dark">
+                            @if (Model.IsOverdue)
+                            {
+                                <span>Overdue</span>
+                            }
+                            else
+                            {
+                                <span>Open</span>
+                            }
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- Status Row -->
+                    <div class="row mb-4 pb-3 border-bottom">
+                        <div class="col-md-3">
+                            <small class="text-muted">Status</small>
+                            <p class="mb-0">
+                                <span class="badge bg-primary">@Model.StatusName</span>
+                            </p>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Priority</small>
+                            <p class="mb-0">
+                                <span class="badge @(Model.PriorityName switch 
+                                {
+                                    "Critical" => "bg-danger",
+                                    "High" => "bg-warning text-dark",
+                                    "Medium" => "bg-info",
+                                    _ => "bg-success"
+                                })">@Model.PriorityName</span>
+                            </p>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Category</small>
+                            <p class="mb-0">@Model.CategoryName</p>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Created</small>
+                            <p class="mb-0">@Model.CreatedOn.ToString("MMM dd, yyyy")</p>
+                        </div>
+                    </div>
+
+                    <!-- People Row -->
+                    <div class="row mb-4 pb-3 border-bottom">
+                        <div class="col-md-6">
+                            <small class="text-muted">Requester</small>
+                            <p class="mb-0">@(Model.RequesterName ?? "Unknown")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted">Assigned To</small>
+                            <p class="mb-0">
+                                @if (!string.IsNullOrEmpty(Model.AssignedToName))
+                                {
+                                    <span>@Model.AssignedToName</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Unassigned</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Due Date & Resolution -->
+                    <div class="row mb-4 pb-3 border-bottom">
+                        @if (Model.DueBy.HasValue)
+                        {
+                            <div class="col-md-4">
+                                <small class="text-muted">Due Date</small>
+                                <p class="mb-0 @(Model.IsOverdue ? "text-danger fw-bold" : "")">
+                                    @Model.DueBy.Value.ToString("MMM dd, yyyy")
+                                </p>
+                            </div>
+                        }
+                        @if (Model.ResolvedOn.HasValue)
+                        {
+                            <div class="col-md-4">
+                                <small class="text-muted">Resolved On</small>
+                                <p class="mb-0">@Model.ResolvedOn.Value.ToString("MMM dd, yyyy HH:mm")</p>
+                            </div>
+                        }
+                        @if (Model.ClosedOn.HasValue)
+                        {
+                            <div class="col-md-4">
+                                <small class="text-muted">Closed On</small>
+                                <p class="mb-0">@Model.ClosedOn.Value.ToString("MMM dd, yyyy HH:mm")</p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-2">Description</h6>
+                        <p class="bg-light p-3 rounded">@Html.Raw(Model.Description.Replace("\n", "<br/>"))</p>
+                    </div>
+
+                    <!-- Staff Actions -->
+                    @if (User.IsInRole("Staff") || User.IsInRole("Admin"))
+                    {
+                        <div class="bg-light p-3 rounded mb-4 border-start border-primary border-5">
+                            <h6 class="mb-3">Staff Actions</h6>
+                            <form method="post" class="d-flex gap-2 flex-wrap">
+                                @if (Model.StatusName != "Resolved" && Model.StatusName != "Closed")
+                                {
+                                    <button type="submit" formaction="@Url.Action("Resolve")" formmethod="post" 
+                                            class="btn btn-success btn-sm" onclick="return confirm('Resolve this ticket?')">
+                                        <i class="bi bi-check-circle"></i> Resolve
+                                    </button>
+                                }
+                                @if (Model.StatusName == "Resolved")
+                                {
+                                    <button type="submit" formaction="@Url.Action("Reopen")" formmethod="post" 
+                                            class="btn btn-warning btn-sm" onclick="return confirm('Reopen this ticket?')">
+                                        <i class="bi bi-arrow-repeat"></i> Reopen
+                                    </button>
+                                }
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" 
+                                        data-bs-target="#assignModal">
+                                    <i class="bi bi-person-check"></i> Assign
+                                </button>
+                                <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" 
+                                        data-bs-target="#statusModal">
+                                    <i class="bi bi-sliders"></i> Change Status
+                                </button>
+                                <a asp-action="Edit" asp-route-id="@Model.TicketId" class="btn btn-secondary btn-sm">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-chat-dots"></i> Comments <span class="badge bg-white text-dark">@Model.CommentCount</span></h5>
+                </div>
+                <div class="card-body">
+                    <div id="commentsContainer" class="mb-4" style="max-height: 400px; overflow-y: auto;">
+                        <!-- Comments will be loaded here -->
+                        <p class="text-muted text-center py-3">Loading comments...</p>
+                    </div>
+
+                    <hr />
+
+                    <!-- Add Comment Form -->
+                    <h6 class="mb-3">Add Comment</h6>
+                    <form method="post" asp-action="AddComment">
+                        <input type="hidden" name="ticketId" value="@Model.TicketId" />
+                        <div class="mb-3">
+                            <textarea class="form-control" id="commentText" name="content" rows="3" 
+                                      placeholder="Type your comment here..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-send"></i> Post Comment
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Attachments Section -->
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-paperclip"></i> Attachments <span class="badge bg-white text-dark">@Model.AttachmentCount</span></h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.AttachmentCount > 0)
+                    {
+                        <div id="attachmentsList" class="mb-4">
+                            <!-- Attachments will be loaded here -->
+                            <p class="text-muted text-center py-3">Loading attachments...</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-3">No attachments yet</p>
+                    }
+
+                    <hr />
+
+                    <!-- Upload Attachment -->
+                    <h6 class="mb-3">Upload File</h6>
+                    <form method="post" asp-action="UploadAttachment" enctype="multipart/form-data">
+                        <input type="hidden" name="ticketId" value="@Model.TicketId" />
+                        <div class="mb-3">
+                            <input type="file" class="form-control" id="attachmentFile" name="file" required />
+                            <small class="text-muted">Max 10 MB. Allowed: images, documents, archives</small>
+                        </div>
+                        <button type="submit" class="btn btn-info btn-sm">
+                            <i class="bi bi-cloud-upload"></i> Upload
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Quick Info -->
+            <div class="card mb-3 bg-light border-0">
+                <div class="card-header bg-light border-0">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Quick Info</h5>
+                </div>
+                <div class="card-body small">
+                    <div class="mb-3">
+                        <strong>Team:</strong><br />
+                        @(Model.TeamName ?? "Not assigned")
+                    </div>
+                    <div>
+                        <strong>Created:</strong><br />
+                        @Model.CreatedOn.ToString("MMM dd, yyyy HH:mm")
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLA Status (if applicable) -->
+            @if (Model.DueBy.HasValue)
+            {
+                <div class="card mb-3">
+                    <div class="card-header bg-warning">
+                        <h6 class="mb-0">SLA Status</h6>
+                    </div>
+                    <div class="card-body small">
+                        @if (Model.IsOverdue)
+                        {
+                            <div class="alert alert-danger py-2 px-2">
+                                <i class="bi bi-exclamation-triangle"></i> Overdue
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info py-2 px-2">
+                                <i class="bi bi-clock"></i> Due: @Model.DueBy.Value.ToString("MMM dd")
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Action Buttons -->
+            <div class="d-grid gap-2">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-list"></i> Back to List
+                </a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-action="Delete" asp-route-id="@Model.TicketId" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Delete Ticket
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Modal -->
+<div class="modal fade" id="assignModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Assign Ticket</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-action="Assign">
+                <input type="hidden" name="ticketId" value="@Model.TicketId" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="assignToUser" class="form-label">Assign To</label>
+                        <select class="form-select" id="assignToUser" name="assignedToId">
+                            <option value="">-- Select User --</option>
+                            @if (ViewBag.Users != null)
+                            {
+                                @foreach (var user in ViewBag.Users)
+                                {
+                                    <option value="@user.Value">@user.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Assign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Status Modal -->
+<div class="modal fade" id="statusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-action="UpdateStatus">
+                <input type="hidden" name="ticketId" value="@Model.TicketId" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="newStatus" class="form-label">New Status</label>
+                        <select class="form-select" id="newStatus" name="statusId" required>
+                            <option value="">-- Select Status --</option>
+                            @if (ViewBag.Statuses != null)
+                            {
+                                @foreach (var status in ViewBag.Statuses)
+                                {
+                                    <option value="@status.Value">@status.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Load comments via AJAX (when you implement the API)
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     fetch(`/api/tickets/@Model.TicketId/comments`)
+        //         .then(r => r.json())
+        //         .then(data => {
+        //             // Render comments
+        //         });
+        // });
+    </script>
+}

@@ -5,7 +5,6 @@
 @{
     ViewData["Title"] = "Users";
     var filter = (UserListFilterViewModel)ViewBag.Filter;
-
     bool isAdmin = User?.IsInRole("Admin") ?? false;
     bool isCeo = User?.IsInRole("Ceo") ?? false;
     bool isStaff = isAdmin || isCeo;           // Admin OR Ceo
@@ -15,7 +14,6 @@
     bool canDeleteUser = isAdmin;                  // Delete = Admin
     bool canViewDetails = isStaff;                 // Details = Admin OR Ceo
     bool canManageClaims = isAdmin;                // ManageClaims = Admin
-
     bool showActionsCol = canViewDetails || canEditUser || canManageRoles || canDeleteUser;
 }
 

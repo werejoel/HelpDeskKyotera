@@ -1,0 +1,190 @@
+﻿@using HelpDeskKyotera.ViewModels.Tickets
+@model TicketEditViewModel
+
+@{
+    ViewData["Title"] = "Edit Ticket";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">
+                        <i class="bi bi-pencil-square"></i> Edit Ticket
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Edit" method="post" novalidate class="needs-validation">
+                        <input type="hidden" asp-for="TicketId" />
+                        <div asp-validation-summary="All" class="alert alert-danger d-none" role="alert" id="validationSummary"></div>
+
+                        <!-- Ticket Info (Read-only) -->
+                        <div class="bg-light p-3 rounded mb-4">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-muted">Ticket Number</small>
+                                    <p class="mb-0 fw-bold">@Model.TicketNumber</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted">Created On</small>
+                                    <p class="mb-0">@Model.CreatedOn.ToString("MMM dd, yyyy HH:mm")</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
+                            <input asp-for="Title" type="text" class="form-control" required />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+                            <textarea asp-for="Description" class="form-control" rows="5" required></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Two Column Row: Category & Priority -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CategoryId" class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                                <select asp-for="CategoryId" class="form-select" required>
+                                    <option value="">-- Select Category --</option>
+                                    @if (ViewBag.Categories != null)
+                                    {
+                                        @foreach (var category in ViewBag.Categories)
+                                        {
+                                            <option value="@category.Value" selected="@(category.Value == Model.CategoryId.ToString())">
+                                                @category.Text
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="PriorityId" class="form-label fw-semibold">Priority <span class="text-danger">*</span></label>
+                                <select asp-for="PriorityId" class="form-select" required>
+                                    <option value="">-- Select Priority --</option>
+                                    @if (ViewBag.Priorities != null)
+                                    {
+                                        @foreach (var priority in ViewBag.Priorities)
+                                        {
+                                            <option value="@priority.Value" selected="@(priority.Value == Model.PriorityId.ToString())">
+                                                @priority.Text
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="PriorityId" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Status & Assignment (Staff/Admin only) -->
+                        @if (User.IsInRole("Staff") || User.IsInRole("Admin"))
+                        {
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="StatusId" class="form-label fw-semibold">Status</label>
+                                    <select asp-for="StatusId" class="form-select">
+                                        <option value="">-- Select Status --</option>
+                                        @if (ViewBag.Statuses != null)
+                                        {
+                                            @foreach (var status in ViewBag.Statuses)
+                                            {
+                                                <option value="@status.Value" selected="@(status.Value == Model.StatusId.ToString())">
+                                                    @status.Text
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="AssignedToId" class="form-label fw-semibold">Assign To</label>
+                                    <select asp-for="AssignedToId" class="form-select">
+                                        <option value="">-- Unassigned --</option>
+                                        @if (ViewBag.Users != null)
+                                        {
+                                            @foreach (var user in ViewBag.Users)
+                                            {
+                                                <option value="@user.Value" selected="@(user.Value == Model.AssignedToId?.ToString())">
+                                                    @user.Text
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Due Date -->
+                        <div class="mb-3">
+                            <label asp-for="DueBy" class="form-label fw-semibold">Due Date</label>
+                            <input asp-for="DueBy" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="DueBy" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-check-circle"></i> Save Changes
+                            </button>
+                            <a asp-action="Details" asp-route-id="@Model.TicketId" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="col-md-4">
+            <div class="card bg-light border-0">
+                <div class="card-header bg-light border-0">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Information</h5>
+                </div>
+                <div class="card-body small">
+                    <p class="mb-2"><strong>Requester:</strong> <br />
+                        @if (Model.RequesterName != null)
+                        {
+                            <span>@Model.RequesterName</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Unknown</span>
+                        }
+                    </p>
+                    @if (Model.ResolvedOn.HasValue)
+                    {
+                        <div class="alert alert-success py-2 px-2 small">
+                            <strong>Resolved:</strong> @Model.ResolvedOn.Value.ToString("MMM dd, yyyy HH:mm")
+                        </div>
+                    }
+                    @if (Model.ClosedOn.HasValue)
+                    {
+                        <div class="alert alert-secondary py-2 px-2 small">
+                            <strong>Closed:</strong> @Model.ClosedOn.Value.ToString("MMM dd, yyyy HH:mm")
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        const validationSummary = document.getElementById('validationSummary');
+        const errorElements = document.querySelectorAll('[data-valmsg-summary]');
+        if (errorElements.length > 0 && errorElements[0].textContent.trim()) {
+            validationSummary.classList.remove('d-none');
+        }
+    </script>
+}

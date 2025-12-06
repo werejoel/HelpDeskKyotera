@@ -1,0 +1,347 @@
+﻿@using HelpDeskKyotera.ViewModels.Tickets
+@model PagedResult<TicketListItemViewModel>
+
+@{
+    ViewData["Title"] = "Tickets";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-0">
+                <i class="bi bi-ticket-detailed"></i> All Tickets
+            </h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Create Ticket
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Filtering Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Filter Tickets</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-3">
+                <div class="col-md-3">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           placeholder="Ticket #, Title..." value="@ViewBag.SearchTerm" />
+                </div>
+                <div class="col-md-2">
+                    <label for="statusId" class="form-label">Status</label>
+                    <select class="form-select" id="statusId" name="statusId">
+                        <option value="">All Statuses</option>
+                        @if (ViewBag.Statuses != null)
+                        {
+                            @foreach (var status in ViewBag.Statuses)
+                            {
+                                <option value="@status.Value" selected="@(status.Value == ViewBag.SelectedStatus)">
+                                    @status.Text
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="priorityId" class="form-label">Priority</label>
+                    <select class="form-select" id="priorityId" name="priorityId">
+                        <option value="">All Priorities</option>
+                        @if (ViewBag.Priorities != null)
+                        {
+                            @foreach (var priority in ViewBag.Priorities)
+                            {
+                                <option value="@priority.Value" selected="@(priority.Value == ViewBag.SelectedPriority)">
+                                    @priority.Text
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="categoryId" class="form-label">Category</label>
+                    <select class="form-select" id="categoryId" name="categoryId">
+                        <option value="">All Categories</option>
+                        @if (ViewBag.Categories != null)
+                        {
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                <option value="@category.Value" selected="@(category.Value == ViewBag.SelectedCategory)">
+                                    @category.Text
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary w-100 ms-2">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    @if (Model?.Items?.Count > 0)
+    {
+        <div class="table-responsive">
+            <table class="table table-hover table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 5%">
+                            <input type="checkbox" id="selectAll" class="form-check-input" />
+                        </th>
+                        <th style="width: 8%">#</th>
+                        <th style="width: 20%">Title</th>
+                        <th style="width: 8%">Priority</th>
+                        <th style="width: 10%">Status</th>
+                        <th style="width: 12%">Assigned To</th>
+                        <th style="width: 10%">Created</th>
+                        <th style="width: 10%">Due</th>
+                        <th style="width: 7%">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        var isOverdue = item.IsOverdue;
+                        var rowClass = isOverdue ? "table-danger" : "";
+                        var priorityBadgeClass = item.PriorityName switch
+                        {
+                            "Critical" => "bg-danger",
+                            "High" => "bg-warning",
+                            "Medium" => "bg-info",
+                            _ => "bg-success"
+                        };
+                        var statusBadgeClass = item.StatusName switch
+                        {
+                            "Open" => "bg-primary",
+                            "In Progress" => "bg-warning",
+                            "Resolved" => "bg-success",
+                            "Closed" => "bg-secondary",
+                            _ => "bg-secondary"
+                        };
+
+                        <tr class="@rowClass">
+                            <td>
+                                <input type="checkbox" class="form-check-input ticket-checkbox" value="@item.TicketId" />
+                            </td>
+                            <td>
+                                <strong>@item.TicketNumber</strong>
+                                @if (isOverdue)
+                                {
+                                    <br />
+                                    <small class="badge bg-danger">Overdue</small>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@item.TicketId" class="text-decoration-none">
+                                    @item.Title
+                                </a>
+                            </td>
+                            <td>
+                                <span class="badge @priorityBadgeClass">@item.PriorityName</span>
+                            </td>
+                            <td>
+                                <span class="badge @statusBadgeClass">@item.StatusName</span>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.AssignedToName))
+                                {
+                                    <small>@item.AssignedToName</small>
+                                }
+                                else
+                                {
+                                    <small class="text-muted">Unassigned</small>
+                                }
+                            </td>
+                            <td>
+                                <small class="text-muted">@item.CreatedOn.ToString("MMM dd, HH:mm")</small>
+                            </td>
+                            <td>
+                                @if (item.DueBy.HasValue)
+                                {
+                                    <small class="@(isOverdue ? "text-danger fw-bold" : "")">
+                                        @item.DueBy.Value.ToString("MMM dd")
+                                    </small>
+                                }
+                                else
+                                {
+                                    <small class="text-muted">-</small>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a asp-action="Details" asp-route-id="@item.TicketId" 
+                                       class="btn btn-outline-primary" title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.TicketId" 
+                                       class="btn btn-outline-secondary" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bulk Actions -->
+        <div class="card mt-3 d-none" id="bulkActionsCard">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="mb-0">
+                            <strong id="selectedCount">0</strong> ticket(s) selected
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" 
+                                data-bs-target="#bulkAssignModal">
+                            <i class="bi bi-person-check"></i> Assign
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" 
+                                data-bs-target="#bulkStatusModal">
+                            <i class="bi bi-arrow-repeat"></i> Update Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Pagination Navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    @if (Model.PageNumber > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-pageNumber="1" 
+                               asp-route-search="@ViewBag.SearchTerm"
+                               asp-route-statusId="@ViewBag.SelectedStatus"
+                               asp-route-priorityId="@ViewBag.SelectedPriority"
+                               asp-route-categoryId="@ViewBag.SelectedCategory">
+                                First
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" 
+                               asp-route-pageNumber="@(Model.PageNumber - 1)"
+                               asp-route-search="@ViewBag.SearchTerm"
+                               asp-route-statusId="@ViewBag.SelectedStatus"
+                               asp-route-priorityId="@ViewBag.SelectedPriority"
+                               asp-route-categoryId="@ViewBag.SelectedCategory">
+                                Previous
+                            </a>
+                        </li>
+                    }
+
+                    @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
+                    {
+                        @if (i == Model.PageNumber)
+                        {
+                            <li class="page-item active">
+                                <span class="page-link">@i</span>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Index" asp-route-pageNumber="@i"
+                                   asp-route-search="@ViewBag.SearchTerm"
+                                   asp-route-statusId="@ViewBag.SelectedStatus"
+                                   asp-route-priorityId="@ViewBag.SelectedPriority"
+                                   asp-route-categoryId="@ViewBag.SelectedCategory">
+                                    @i
+                                </a>
+                            </li>
+                        }
+                    }
+
+                    @if (Model.PageNumber < Model.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" 
+                               asp-route-pageNumber="@(Model.PageNumber + 1)"
+                               asp-route-search="@ViewBag.SearchTerm"
+                               asp-route-statusId="@ViewBag.SelectedStatus"
+                               asp-route-priorityId="@ViewBag.SelectedPriority"
+                               asp-route-categoryId="@ViewBag.SelectedCategory">
+                                Next
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" 
+                               asp-route-pageNumber="@Model.TotalPages"
+                               asp-route-search="@ViewBag.SearchTerm"
+                               asp-route-statusId="@ViewBag.SelectedStatus"
+                               asp-route-priorityId="@ViewBag.SelectedPriority"
+                               asp-route-categoryId="@ViewBag.SelectedCategory">
+                                Last
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle"></i> No tickets found. 
+            <a asp-action="Create">Create a new ticket</a> to get started.
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const ticketCheckboxes = document.querySelectorAll('.ticket-checkbox');
+            const bulkActionsCard = document.getElementById('bulkActionsCard');
+            const selectedCount = document.getElementById('selectedCount');
+
+            function updateBulkActionsUI() {
+                const checkedCount = document.querySelectorAll('.ticket-checkbox:checked').length;
+                selectedCount.textContent = checkedCount;
+                if (checkedCount > 0) {
+                    bulkActionsCard.classList.remove('d-none');
+                } else {
+                    bulkActionsCard.classList.add('d-none');
+                }
+            }
+
+            selectAllCheckbox.addEventListener('change', function() {
+                ticketCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateBulkActionsUI();
+            });
+
+            ticketCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateBulkActionsUI();
+                });
+            });
+        });
+    </script>
+}

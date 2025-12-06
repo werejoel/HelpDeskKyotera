@@ -64,6 +64,7 @@ namespace HelpDeskKyotera
             builder.Services.AddScoped<IRoleService, RoleService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IClaimsService, ClaimsService>();
+            builder.Services.AddScoped<ITicketService, TicketService>();
 
 
             var app = builder.Build();
