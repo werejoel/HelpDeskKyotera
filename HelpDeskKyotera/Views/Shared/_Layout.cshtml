@@ -18,7 +18,7 @@
 <body class="d-flex flex-column min-vh-100">
     <!-- Dark Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
+        <div class="container-fluid">
             <a class="navbar-brand fw-bold" href="@Url.Action("Index", "Home")">HelpDesk Kyotera</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
                     aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,18 +26,6 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    @* <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index", "Home")">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("About", "Home")">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="SecureMethod">Secure</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="NonSecureMethod">Non Secure</a>
-                    </li> *@
                     <!-- Admin-only -->
                     @if (isAdmin)
                     {
@@ -46,60 +34,22 @@
                                 <i class="bi bi-speedometer2"></i> Dashboard
                             </a>
                         </li>
-                       @*  <li class="nav-item">
-                            <a class="nav-link" asp-controller="Roles" asp-action="Index">
-                                Roles
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Claims" asp-action="Index">
-                                Claims
-                            </a>
-                        </li> *@
-                    }
-                    <!-- Admin OR Manager -->
-                    @if (isStaff)
-                    {
-                       @*  <li class="nav-item">
-                            <a class="nav-link" asp-controller="Users" asp-action="Index">
-                                Users
-                            </a>
-                        </li> *@
                     }
                 </ul>
                 <ul class="navbar-nav mb-2 mb-lg-0">
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                               data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-person-circle me-1"></i>
-                                Hello, @User.Identity.Name
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Profile", "Account")">
+                                <i class="bi bi-person-circle me-1"></i> @User.Identity.Name
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li>
-                                    <a class="dropdown-item" href="@Url.Action("Profile", "Account")">
-                                        <i class="bi bi-person-lines-fill me-2"></i> Profile
-                                    </a>
-                                </li>
-                               @*  @if (isAdmin)
-                                {
-                                    <li><hr class="dropdown-divider" /></li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="AdminDashboard" asp-action="Index">
-                                            <i class="bi bi-speedometer2 me-2"></i> Admin Dashboard
-                                        </a>
-                                    </li>
-                                } *@
-                                <li><hr class="dropdown-divider" /></li>
-                                <li>
-                                    <form method="post" asp-controller="Account" asp-action="Logout" class="px-3 py-1">
-                                        <button type="submit" class="btn btn-link text-decoration-none w-100 text-start">
-                                            <i class="bi bi-box-arrow-right me-2"></i> Logout
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <form method="post" asp-controller="Account" asp-action="Logout" class="d-inline">
+                                <button type="submit" class="nav-link btn btn-link text-decoration-none">
+                                    <i class="bi bi-box-arrow-right me-1"></i> Logout
+                                </button>
+                            </form>
                         </li>
                     }
                     else
