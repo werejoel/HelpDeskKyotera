@@ -538,5 +538,87 @@ namespace HelpDeskKyotera.Services
 
             return $"INC{date}{sequence:D3}";
         }
+
+        public async Task<PagedResult<Ticket>> GetTicketsByRequesterAsync(Guid userId, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var query = _context.Tickets
+                    .Where(t => t.RequesterId == userId)
+                    .Include(t => t.Requester)
+                    .Include(t => t.AssignedTo)
+                    .Include(t => t.Category)
+                    .Include(t => t.Priority)
+                    .Include(t => t.Status)
+                    .AsNoTracking()
+                    .OrderByDescending(t => t.CreatedOn);
+
+                var total = await query.CountAsync();
+                var tickets = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return new PagedResult<Ticket>
+                {
+                    Items = tickets,
+                    TotalCount = total,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving tickets for requester {userId}");
+                return new PagedResult<Ticket> 
+                { 
+                    Items = new List<Ticket>(), 
+                    TotalCount = 0, 
+                    PageNumber = pageNumber, 
+                    PageSize = pageSize 
+                };
+            }
+        }
+
+        public async Task<PagedResult<Ticket>> GetTicketsByAssigneeAsync(Guid userId, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var query = _context.Tickets
+                    .Where(t => t.AssignedToId == userId)
+                    .Include(t => t.Requester)
+                    .Include(t => t.AssignedTo)
+                    .Include(t => t.Category)
+                    .Include(t => t.Priority)
+                    .Include(t => t.Status)
+                    .AsNoTracking()
+                    .OrderByDescending(t => t.CreatedOn);
+
+                var total = await query.CountAsync();
+                var tickets = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return new PagedResult<Ticket>
+                {
+                    Items = tickets,
+                    TotalCount = total,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving tickets for assignee {userId}");
+                return new PagedResult<Ticket> 
+                { 
+                    Items = new List<Ticket>(), 
+                    TotalCount = 0, 
+                    PageNumber = pageNumber, 
+                    PageSize = pageSize 
+                };
+            }
+        }
     }
 }

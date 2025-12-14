@@ -31,7 +31,16 @@
                     {
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="AdminDashboard" asp-action="Index">
-                                <i class="bi bi-speedometer2"></i> Dashboard
+                                <i class="bi bi-speedometer2"></i> Admin Dashboard
+                            </a>
+                        </li>
+                    }
+                    <!-- User Dashboard for all authenticated users -->
+                    @if (isAuthenticated && !isAdmin)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="UserDashboard" asp-action="Index">
+                                <i class="bi bi-graph-up"></i> Dashboard
                             </a>
                         </li>
                     }

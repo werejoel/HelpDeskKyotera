@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using HelpDeskKyotera.Services;
 using HelpDeskKyotera.ViewModels;
 using HelpDeskKyotera.ViewModels.Tickets;
@@ -288,6 +289,12 @@ namespace HelpDeskKyotera.Controllers
                 TempData["Error"] = "An unexpected error occurred.";
             }
 
+            // If coming from AssignmentManagement, redirect back there
+            if (!string.IsNullOrEmpty(Request.Headers["Referer"]) && Request.Headers["Referer"].ToString().Contains("AssignmentManagement"))
+            {
+                return RedirectToAction(nameof(AssignmentManagement));
+            }
+
             return RedirectToAction(nameof(Details), new { id });
         }
 
@@ -504,6 +511,76 @@ namespace HelpDeskKyotera.Controllers
             }
 
             return RedirectToAction(nameof(Details), new { id = ticketId });
+        }
+
+        // GET: Tickets/AssignmentManagement
+        [Authorize(Roles = "Admin,Staff")]
+        public async Task<IActionResult> AssignmentManagement(string? priority = null, string? category = null, string? sortBy = "created")
+        {
+            try
+            {
+                // Get unassigned tickets
+                var unassignedTickets = _context.Tickets
+                    .Where(t => t.AssignedToId == null)
+                    .Include(t => t.Requester)
+                    .Include(t => t.Category)
+                    .Include(t => t.Priority)
+                    .Include(t => t.Status)
+                    .AsNoTracking();
+
+                // Apply filters
+                if (!string.IsNullOrEmpty(priority))
+                {
+                    unassignedTickets = unassignedTickets.Where(t => t.Priority.Name == priority);
+                }
+
+                if (!string.IsNullOrEmpty(category))
+                {
+                    unassignedTickets = unassignedTickets.Where(t => t.Category.Name == category);
+                }
+
+                // Apply sorting
+                var sorted = sortBy switch
+                {
+                    "dueDate" => unassignedTickets.OrderBy(t => t.DueBy),
+                    "priority" => unassignedTickets.OrderBy(t => t.Priority.Name),
+                    _ => unassignedTickets.OrderByDescending(t => t.CreatedOn)
+                };
+
+                var tickets = await sorted.ToListAsync();
+
+                // Calculate statistics
+                var allTickets = _context.Tickets.AsNoTracking();
+                ViewBag.UnassignedCount = tickets.Count;
+                ViewBag.CriticalCount = await allTickets.Where(t => t.AssignedToId == null && t.Priority.Name == "Critical").CountAsync();
+                ViewBag.HighCount = await allTickets.Where(t => t.AssignedToId == null && t.Priority.Name == "High").CountAsync();
+                ViewBag.OverdueCount = await allTickets.Where(t => t.AssignedToId == null && t.DueBy < DateTime.Now).CountAsync();
+
+                // Load filter options
+                var categories = await _ticketService.GetCategoriesAsync();
+                ViewBag.Categories = new SelectList(categories, "CategoryId", "Name");
+
+                // Load available staff (users with Staff or Admin role)
+                var staffRoleId = await _context.Roles.Where(r => r.Name == "Staff" || r.Name == "Admin")
+                    .Select(r => r.Id).FirstOrDefaultAsync();
+
+                var availableStaff = await _context.UserRoles
+                    .Where(ur => ur.RoleId == staffRoleId)
+                    .Join(_context.Users, ur => ur.UserId, u => u.Id, (ur, u) => u)
+                    .Select(u => new { u.Id, FullName = u.FirstName + " " + u.LastName })
+                    .ToListAsync();
+
+                ViewBag.AvailableStaff = new SelectList(availableStaff, "Id", "FullName");
+                ViewBag.UnassignedTickets = tickets;
+
+                return View(tickets);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading assignment management");
+                TempData["Error"] = "An error occurred while loading assignment data.";
+                return RedirectToAction(nameof(Index));
+            }
         }
     }
 }

@@ -1,0 +1,217 @@
+@model HelpDeskKyotera.ViewModels.UserDashboardViewModel
+
+@{
+    ViewData["Title"] = "User Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid my-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="fw-bold">Welcome, @Model.FirstName!</h1>
+            <p class="text-muted">Your Help Desk Dashboard</p>
+        </div>
+    </div>
+
+    <!-- User Info Card -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Department</h6>
+                            <p class="fw-semibold">@(Model.Department?.Name ?? "Not Assigned")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Roles</h6>
+                            <p class="fw-semibold">
+                                @if (Model.UserRoles.Any())
+                                {
+                                    @string.Join(", ", Model.UserRoles)
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No roles assigned</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Email</h6>
+                            <p class="fw-semibold">@Model.Email</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Phone</h6>
+                            <p class="fw-semibold">@(Model.PhoneNumber ?? "Not Provided")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Row -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 bg-primary bg-opacity-10">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">My Tickets Submitted</h6>
+                            <h3 class="fw-bold text-primary">@Model.TotalRequestedTickets</h3>
+                        </div>
+                        <i class="bi bi-ticket-perforated text-primary" style="font-size: 2.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 bg-success bg-opacity-10">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Tickets Assigned to Me</h6>
+                            <h3 class="fw-bold text-success">@Model.TotalAssignedTickets</h3>
+                        </div>
+                        <i class="bi bi-check2-circle text-success" style="font-size: 2.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Tickets -->
+    <div class="row">
+        <!-- Recent Submitted Tickets -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0">Recent Tickets Submitted</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentRequestedTickets.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Ticket #</th>
+                                        <th>Title</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var ticket in Model.RecentRequestedTickets.Take(5))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a href="/Tickets/Details/@ticket.TicketId" class="text-decoration-none">
+                                                    @ticket.TicketNumber
+                                                </a>
+                                            </td>
+                                            <td>@ticket.Title</td>
+                                            <td>
+                                                @if (ticket.Status != null)
+                                                {
+                                                    <span class="badge bg-secondary">@ticket.Status.Name</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a asp-action="MyTickets" class="btn btn-sm btn-outline-primary">View All My Tickets</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No tickets submitted yet.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Assigned Tickets -->
+        @if (Model.UserRoles.Contains("Staff") || Model.UserRoles.Contains("Admin"))
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-light border-bottom">
+                        <h5 class="mb-0">Assigned to Me</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.RecentAssignedTickets.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Ticket #</th>
+                                            <th>Title</th>
+                                            <th>Priority</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var ticket in Model.RecentAssignedTickets.Take(5))
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <a href="/Tickets/Details/@ticket.TicketId" class="text-decoration-none">
+                                                        @ticket.TicketNumber
+                                                    </a>
+                                                </td>
+                                                <td>@ticket.Title</td>
+                                                <td>
+                                                    @if (ticket.Priority != null)
+                                                    {
+                                                        <span class="badge bg-warning">@ticket.Priority.Name</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="text-center mt-3">
+                                <a asp-action="AssignedTickets" class="btn btn-sm btn-outline-success">View All Assigned</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted text-center">No tickets assigned yet.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group" role="group">
+                        <a href="/Tickets/Create" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Create New Ticket
+                        </a>
+                        <a asp-action="MyTickets" class="btn btn-outline-primary">
+                            <i class="bi bi-list-ul"></i> View My Tickets
+                        </a>
+                        <a asp-action="Profile" class="btn btn-outline-info">
+                            <i class="bi bi-person-circle"></i> View Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
