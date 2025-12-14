@@ -38,6 +38,11 @@
                 </a>
             </li>
             <li class="nav-item mb-2">
+                <a class="nav-link text-white rounded-3" asp-controller="Categories" asp-action="Index">
+                    <i class="bi bi-tags me-2"></i> Categories
+                </a>
+            </li>
+            <li class="nav-item mb-2">
                 <a class="nav-link text-white rounded-3" asp-controller="Tickets" asp-action="Index">
                     <i class="bi bi-ticket-perforated me-2"></i> All Tickets
                 </a>
@@ -250,6 +255,9 @@
                                 </a>
                                 <a asp-controller="Roles" asp-action="Create" class="btn btn-info text-white rounded-pill">
                                     <i class="bi bi-shield-lock"></i> Create Role
+                                </a>
+                                <a asp-controller="Categories" asp-action="Create" class="btn btn-secondary rounded-pill">
+                                    <i class="bi bi-folder-plus"></i> Create Category
                                 </a>
                                 <a asp-controller="Tickets" asp-action="AssignmentManagement" class="btn btn-danger rounded-pill">
                                     <i class="bi bi-arrow-left-right"></i> Assign Tickets
