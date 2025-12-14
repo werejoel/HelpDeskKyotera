@@ -187,9 +187,30 @@ namespace HelpDeskKyotera.Controllers
 
                 if (result.Succeeded)
                 {
-                    // Check if user is Admin
-                    if (User.IsInRole("Admin"))
-                        return RedirectToAction("Index", "AdminDashboard");
+                    // After successful sign-in, check the user's roles and redirect Admins to the Admin Dashboard.
+                    // Add diagnostic logging to help figure out why redirect may not occur.
+                    using var scope = HttpContext.RequestServices.CreateScope();
+                    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                    var signedInUser = await userManager.FindByEmailAsync(model.Email);
+
+                    if (signedInUser == null)
+                    {
+                        _logger.LogWarning("Login succeeded but user lookup by email failed for '{Email}'", model.Email);
+                    }
+                    else
+                    {
+                        var roles = await userManager.GetRolesAsync(signedInUser);
+                        _logger.LogInformation("User '{Email}' roles after sign-in: {Roles}", model.Email, string.Join(',', roles));
+
+                        var isAdmin = roles != null && roles.Contains("Admin");
+                        _logger.LogInformation("IsAdmin check for '{Email}': {IsAdmin}", model.Email, isAdmin);
+
+                        if (isAdmin || await userManager.IsInRoleAsync(signedInUser, "Admin"))
+                        {
+                            _logger.LogInformation("Redirecting admin user '{Email}' to AdminDashboard", model.Email);
+                            return RedirectToAction("Index", "AdminDashboard");
+                        }
+                    }
 
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                         return Redirect(returnUrl);
