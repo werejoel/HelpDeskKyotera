@@ -7,6 +7,7 @@
 
 <style>
     :root {
+        --sidebar-width: 280px;
         --primary-color: #2563eb;
         --primary-dark: #1e40af;
         --primary-light: #3b82f6;
@@ -49,7 +50,7 @@
 
     /* Sidebar */
     .sidebar {
-        width: 280px;
+        width: var(--sidebar-width);
         background: linear-gradient(180deg, var(--bg-sidebar) 0%, #0f172a 100%);
         color: white;
         position: fixed;
@@ -251,9 +252,18 @@
     /* Main Content */
     .main-content {
         flex: 1;
-        margin-left: 280px;
+        margin-left: var(--sidebar-width);
         padding: 2rem;
         background: var(--bg-main);
+    }
+
+    /* Collapsed sidebar support */
+    .sidebar.collapsed {
+        transform: translateX(-100%);
+    }
+
+    .main-content.expanded {
+        margin-left: 0;
     }
 
     .dashboard-header {
@@ -901,7 +911,7 @@
 
 </style>
 
-<div class="d-flex" style="min-height: 100vh; background: var(--bg-main);">
+<div class="admin-container" style="min-height: 100vh; background: var(--bg-main);">
     <!-- Sidebar Toggle Button -->
     <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
         <i class="bi bi-chevron-left"></i>
@@ -939,7 +949,7 @@
                 <ul class="nav flex-column" style="padding: 0;">
                     <li class="nav-item">
                         <a class="nav-link text-white rounded-2 px-3 py-2 @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" && ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "bg-primary bg-opacity-25" : "")" 
-                           asp-action="Index" asp-controller="Home" style="transition: all 0.2s ease;">
+                           asp-action="Index" asp-contr  'oller="Home" style="transition: all 0.2s ease;">
                             <i class="bi bi-speedometer2 me-2"></i> Dashboard
                         </a>
                     </li>
@@ -1013,18 +1023,8 @@
     </nav>
 
     <!-- Main Content -->
-    <main id="mainContent" style="margin-left: 280px; width: calc(100% - 280px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+    <main id="mainContent" class="main-content" style="transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
         <!-- Top Bar -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top border-bottom">
-            <div class="container-fluid">
-                <h4 class="navbar-brand mb-0 fw-bold text-dark">
-                    <i class="bi bi-speedometer2 text-primary me-2"></i> Dashboard Overview
-                </h4>
-                <div class="ms-auto text-muted fw-medium">
-                    <i class="bi bi-calendar3 me-1"></i> @DateTime.Now:dddd, MMMM dd, yyyy
-                </div>
-            </div>
-        </nav>
 
         <!-- Page Content -->
         <div class="container-fluid p-5">

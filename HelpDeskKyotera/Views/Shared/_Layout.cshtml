@@ -40,7 +40,7 @@
 
         #sidebar {
             width: var(--sidebar-width);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #01010fff 0%, #003366 80%)
             color: white;
             transition: transform var(--transition-speed) ease;
             position: fixed;
@@ -60,7 +60,7 @@
         #mainContent {
             flex: 1;
             transition: margin-left var(--transition-speed) ease;
-            margin-left: var(--sidebar-width);
+            margin-left: 0; /* layout no longer contains a global sidebar */
         }
 
         #mainContent.expanded {
@@ -119,7 +119,7 @@
             height: 40px;
             padding: 0;
             border: none;
-            background-color: #667eea;
+            background-color: linear-gradient(135deg, #01010fff 0%, #003366 80%);
             color: white;
             cursor: pointer;
             border-radius: 0.5rem;
@@ -398,11 +398,11 @@
                     }
                     @if (isAuthenticated)
                     {
-                        <li class="nav-item">
+                       @*  <li class="nav-item">
                             <a class="nav-link" asp-controller="Tickets" asp-action="Index">
                                 <i class="bi bi-ticket"></i> Tickets
                             </a>
-                        </li>
+                        </li> *@
                     }
                 </ul>
                 <ul class="navbar-nav mb-2 mb-lg-0">
@@ -435,66 +435,7 @@
         </div>
     </nav>
 
-    <!-- Sidebar Toggle Button -->
-    @if (isAdmin)
-    {
-        <button id="sidebarToggle" type="button" title="Toggle Sidebar">
-            <i class="bi bi-list"></i>
-        </button>
-
-        <!-- Sidebar -->
-        <aside id="sidebar">
-            <div class="sidebar-header">
-                <strong>Logged in as</strong><br>
-                <small>@User.Identity?.Name</small>
-            </div>
-            <ul class="sidebar-nav">
-                <li>
-                    <a class="nav-link" asp-controller="AdminDashboard" asp-action="Index">
-                        <i class="bi bi-speedometer2"></i> Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" asp-controller="Tickets" asp-action="Index">
-                        <i class="bi bi-ticket-fill"></i> Tickets
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" asp-controller="Tickets" asp-action="AssignmentManagement">
-                        <i class="bi bi-person-check"></i> Assignments
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" asp-controller="Categories" asp-action="Index">
-                        <i class="bi bi-tag"></i> Categories
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" asp-controller="Users" asp-action="Index">
-                        <i class="bi bi-people"></i> Users
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" asp-controller="Departments" asp-action="Index">
-                        <i class="bi bi-building"></i> Departments
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" asp-controller="Roles" asp-action="Index">
-                        <i class="bi bi-shield-lock"></i> Roles
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" asp-controller="DataSeeding" asp-action="Index">
-                        <i class="bi bi-database"></i> Data Seeding
-                    </a>
-                </li>
-            </ul>
-            <div class="sidebar-footer">
-                <small class="text-white-50">HelpDesk Kyotera v1.0</small>
-            </div>
-        </aside>
-    }
+    <!-- (Global layout no longer renders a sidebar; page-specific sidebars remain in their views) -->
 
     <!-- Hero Section with Background -->
     @if (showHero)
@@ -625,42 +566,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     
-    <script>
-        // Sidebar toggle functionality for admin users
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('mainContent');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-
-        if (sidebarToggle && sidebar && mainContent) {
-            // Load initial state from localStorage
-            const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            if (sidebarCollapsed) {
-                sidebar.classList.add('collapsed');
-                mainContent.classList.add('expanded');
-            }
-
-            // Toggle sidebar on button click
-            sidebarToggle.addEventListener('click', function () {
-                sidebar.classList.toggle('collapsed');
-                mainContent.classList.toggle('expanded');
-
-                // Save state to localStorage
-                const isCollapsed = sidebar.classList.contains('collapsed');
-                localStorage.setItem('sidebarCollapsed', isCollapsed);
-            });
-
-            // Close sidebar on small screens when a link is clicked
-            const sidebarLinks = sidebar.querySelectorAll('.nav-link');
-            sidebarLinks.forEach(link => {
-                link.addEventListener('click', function () {
-                    if (window.innerWidth <= 768) {
-                        sidebar.classList.add('collapsed');
-                        mainContent.classList.add('expanded');
-                    }
-                });
-            });
-        }
-    </script>
+    <!-- Page-specific scripts can handle their own sidebars if present -->
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
