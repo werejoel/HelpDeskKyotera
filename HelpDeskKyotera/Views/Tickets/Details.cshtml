@@ -119,6 +119,7 @@
                         <div class="bg-light p-3 rounded mb-4 border-start border-primary border-5">
                             <h6 class="mb-3">Staff Actions</h6>
                             <form method="post" class="d-flex gap-2 flex-wrap">
+                                <input type="hidden" name="id" value="@Model.TicketId" />
                                 @if (Model.StatusName != "Resolved" && Model.StatusName != "Closed")
                                 {
                                     <button type="submit" formaction="@Url.Action("Resolve")" formmethod="post" 
@@ -282,7 +283,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="post" asp-action="Assign">
-                <input type="hidden" name="ticketId" value="@Model.TicketId" />
+                <input type="hidden" name="id" value="@Model.TicketId" />
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="assignToUser" class="form-label">Assign To</label>
@@ -316,7 +317,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="post" asp-action="UpdateStatus">
-                <input type="hidden" name="ticketId" value="@Model.TicketId" />
+                <input type="hidden" name="id" value="@Model.TicketId" />
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="newStatus" class="form-label">New Status</label>

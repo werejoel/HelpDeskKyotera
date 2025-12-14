@@ -47,7 +47,7 @@
                         {
                             @foreach (var status in ViewBag.Statuses)
                             {
-                                <option value="@status.Value" selected="@(status.Value == ViewBag.SelectedStatus)">
+                                <option value="@status.Value" selected="@(status.Value == (ViewBag.SelectedStatus?.ToString() ?? ""))">
                                     @status.Text
                                 </option>
                             }
@@ -62,7 +62,7 @@
                         {
                             @foreach (var priority in ViewBag.Priorities)
                             {
-                                <option value="@priority.Value" selected="@(priority.Value == ViewBag.SelectedPriority)">
+                                <option value="@priority.Value" selected="@(priority.Value == (ViewBag.SelectedPriority?.ToString() ?? ""))">
                                     @priority.Text
                                 </option>
                             }
@@ -77,7 +77,7 @@
                         {
                             @foreach (var category in ViewBag.Categories)
                             {
-                                <option value="@category.Value" selected="@(category.Value == ViewBag.SelectedCategory)">
+                                <option value="@category.Value" selected="@(category.Value == (ViewBag.SelectedCategory?.ToString() ?? ""))">
                                     @category.Text
                                 </option>
                             }
