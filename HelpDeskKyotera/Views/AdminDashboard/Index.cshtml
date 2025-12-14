@@ -853,25 +853,24 @@
     /* Sidebar Toggle */
     .sidebar-toggle {
         position: fixed !important;
-        top: 1rem !important;
-        left: 290px !important;
+        top: 0.75rem !important;
+        left: 0.75rem !important;   /* Slightly inset from the corner */
+        width: 30px !important;   /* Smaller button */
+        height: 30px !important;
+        min-width: 30px !important;
+        z-index: 1002 !important; /* Above sidebar */
         background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
         color: white !important;
         border: none !important;
         border-radius: 50% !important;
-        width: 45px !important;
-        height: 45px !important;
-        min-width: 45px !important;
-        max-width: 45px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         cursor: pointer !important;
-        z-index: 999 !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
-        transition: all 0.3s ease !important;
-        font-size: 1.25rem !important;
+        transition: all 0.18s ease !important;
+        font-size: 0.95rem !important;
         padding: 0 !important;
+        box-shadow: 0 3px 8px rgba(37, 99, 235, 0.25) !important;
     }
 
     .sidebar-toggle:hover {
@@ -884,7 +883,7 @@
     }
 
     .sidebar-toggle.collapsed {
-        left: 10px !important;
+        left: 0.75rem !important;    /* Stay in same position when collapsed */
     }
 
     #sidebar.collapsed {
