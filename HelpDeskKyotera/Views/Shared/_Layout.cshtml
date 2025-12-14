@@ -29,11 +29,11 @@
                     <!-- Admin-only -->
                     @if (isAdmin)
                     {
-                        <li class="nav-item">
+                        @* <li class="nav-item">
                             <a class="nav-link" asp-controller="AdminDashboard" asp-action="Index">
                                 <i class="bi bi-speedometer2"></i> Admin Dashboard
                             </a>
-                        </li>
+                        </li> *@
                     }
                     <!-- User Dashboard for all authenticated users -->
                     @if (isAuthenticated && !isAdmin)
