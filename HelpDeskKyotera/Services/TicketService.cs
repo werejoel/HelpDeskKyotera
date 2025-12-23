@@ -3,6 +3,7 @@ using HelpDeskKyotera.Models;
 using HelpDeskKyotera.ViewModels;
 using HelpDeskKyotera.ViewModels.Tickets;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace HelpDeskKyotera.Services
 {
@@ -10,11 +11,17 @@ namespace HelpDeskKyotera.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<TicketService> _logger;
+        private readonly IEmailService _emailService;
+        private readonly INotificationService _notificationService;
+        private readonly IConfiguration _configuration;
 
-        public TicketService(ApplicationDbContext context, ILogger<TicketService> logger)
+        public TicketService(ApplicationDbContext context, ILogger<TicketService> logger, IEmailService emailService, INotificationService notificationService, IConfiguration configuration)
         {
             _context = context;
             _logger = logger;
+            _emailService = emailService;
+            _notificationService = notificationService;
+            _configuration = configuration;
         }
 
         public async Task<PagedResult<TicketListItemViewModel>> GetTicketsAsync(TicketFilterViewModel filter)
@@ -241,6 +248,83 @@ namespace HelpDeskKyotera.Services
 
                 _context.Tickets.Add(ticket);
                 await _context.SaveChangesAsync();
+
+                // Send notifications to Admins and department users
+                try
+                {
+                    var recipientEmails = new List<string>();
+                    var recipientUserIds = new List<Guid>();
+
+                    // Load extra recipients from configuration (Notifications:Recipients)
+                    var extraRecipients = _configuration.GetSection("Notifications:Recipients").Get<string[]>() ?? Array.Empty<string>();
+                    recipientEmails.AddRange(extraRecipients.Where(e => !string.IsNullOrWhiteSpace(e)));
+
+                    // Admin users
+                    var adminRole = await _context.Roles.AsNoTracking().FirstOrDefaultAsync(r => r.Name == "Admin");
+                    if (adminRole != null)
+                    {
+                        var adminUserIds = await _context.UserRoles
+                            .Where(ur => ur.RoleId == adminRole.Id)
+                            .Select(ur => ur.UserId)
+                            .ToListAsync();
+
+                        var admins = await _context.Users
+                            .Where(u => adminUserIds.Contains(u.Id) && u.IsActive)
+                            .Select(u => new { u.Id, u.Email })
+                            .ToListAsync();
+
+                        recipientUserIds.AddRange(admins.Select(a => a.Id));
+                        recipientEmails.AddRange(admins.Where(a => !string.IsNullOrEmpty(a.Email)).Select(a => a.Email!));
+                    }
+
+                    // Department users (if applicable)
+                    if (ticket.DepartmentId.HasValue)
+                    {
+                        var deptUsers = await _context.Users
+                            .Where(u => u.DepartmentId == ticket.DepartmentId && u.IsActive)
+                            .Select(u => new { u.Id, u.Email })
+                            .ToListAsync();
+
+                        recipientUserIds.AddRange(deptUsers.Select(d => d.Id));
+                        recipientEmails.AddRange(deptUsers.Where(d => !string.IsNullOrEmpty(d.Email)).Select(d => d.Email!));
+                    }
+
+                    // Deduplicate
+                    recipientEmails = recipientEmails.Where(e => !string.IsNullOrWhiteSpace(e)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                    recipientUserIds = recipientUserIds.Distinct().ToList();
+
+                    // Build subject/body from templates if present
+                    var templates = _configuration.GetSection("Notifications:Templates");
+                    var subjectTemplate = templates.GetValue<string>("NewTicketSubject") ?? "New ticket: {TicketNumber}";
+                    var htmlTemplate = templates.GetValue<string>("NewTicketHtml") ?? "<p>New ticket {TicketNumber}</p>";
+
+                    var ticketLink = $"{_configuration.GetValue<string>("AppSettings:BaseUrl") ?? string.Empty}/Tickets/Details/{ticketId}";
+                    var subject = subjectTemplate.Replace("{TicketNumber}", ticketNumber).Replace("{Title}", ticket.Title);
+                    var html = htmlTemplate.Replace("{TicketNumber}", ticketNumber)
+                                            .Replace("{Title}", System.Net.WebUtility.HtmlEncode(ticket.Title))
+                                            .Replace("{Requester}", System.Net.WebUtility.HtmlEncode(requester?.FirstName + " " + requester?.LastName))
+                                            .Replace("{Link}", ticketLink);
+
+                    // Create in-app notifications for known user IDs
+                    foreach (var uid in recipientUserIds)
+                    {
+                        await _notificationService.CreateNotificationAsync(uid, null, subject, html, ticketLink);
+                    }
+
+                    // Create notification records for email-only recipients (no userId)
+                    foreach (var email in recipientEmails.Except(await _context.Users.Where(u => recipientUserIds.Contains(u.Id)).Select(u => u.Email!).ToListAsync(), StringComparer.OrdinalIgnoreCase))
+                    {
+                        await _notificationService.CreateNotificationAsync(null, email, subject, html, ticketLink);
+                    }
+
+                    // Send emails
+                    var sendTasks = recipientEmails.Select(to => _emailService.SendHtmlEmailAsync(to, subject, html));
+                    await Task.WhenAll(sendTasks);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to send ticket notification emails or create notifications");
+                }
 
                 _logger.LogInformation($"Ticket {ticketNumber} created by user {requesterId}");
                 return (true, $"Ticket {ticketNumber} created successfully.", ticketId);

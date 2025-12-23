@@ -21,6 +21,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<Ticket> Tickets { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<Attachment> Attachments { get; set; }
+    public DbSet<Models.Notification> Notifications { get; set; }
     public DbSet<Address> Addresses { get; set; }
     public DbSet<ClaimMaster> ClaimMasters { get; set; }
     //public DbSet<Article> Articles { get; set; }

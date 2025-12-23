@@ -4,6 +4,7 @@ using HelpDeskKyotera.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HelpDeskKyotera.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251223232628_nnn")]
+    partial class nnn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -255,7 +258,7 @@ namespace HelpDeskKyotera.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@HELPDESKYOTERA.COM",
                             NormalizedUserName = "ADMIN@HELPDESKYOTERA.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEH15Xv51WPxEy1L3cfe1dosnXpf6NHJtB1cBeJbrmLj0kIrqWkxAKCu8tpVrQqyTyw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAECUThvG+YkOp9WhGz5k7SMiezQiLJSz2xVEfHI1xCDEmlIHUqL6B0aUB0Qb9BrDsaw==",
                             PhoneNumber = "+256781234567",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "ADMINSECURITYSTAMP123",

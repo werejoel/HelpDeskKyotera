@@ -96,5 +96,10 @@ namespace HelpDeskKyotera.Services
                 Console.WriteLine(ex.ToString());
             }
         }
+
+            public async Task SendHtmlEmailAsync(string toEmail, string subject, string htmlContent)
+            {
+              await SendEmailAsync(toEmail, subject, htmlContent, true);
+            }
     }
 }
