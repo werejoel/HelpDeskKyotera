@@ -252,6 +252,43 @@ namespace HelpDeskKyotera.Services
                 Claims = claimTexts
             };
         }
+
+        // Allows an admin to mark an account's email as confirmed/unconfirmed
+        public async Task<IdentityResult> SetEmailConfirmedAsync(Guid userId, bool confirmed)
+        {
+            var strategy = _dbContext.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync<IdentityResult>(async () =>
+            {
+                await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+                try
+                {
+                    var user = await _userManager.FindByIdAsync(userId.ToString());
+                    if (user == null)
+                    {
+                        await transaction.RollbackAsync();
+                        return IdentityResult.Failed(new IdentityError { Code = "NotFound", Description = "User not found." });
+                    }
+
+                    user.EmailConfirmed = confirmed;
+                    user.ModifiedOn = DateTime.UtcNow;
+
+                    var update = await _userManager.UpdateAsync(user);
+                    if (!update.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
+                        return update;
+                    }
+
+                    await transaction.CommitAsync();
+                    return IdentityResult.Success;
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            });
+        }
         // Deletes a user with a guard to prevent removing the last Admin.
         public async Task<IdentityResult> DeleteAsync(Guid id)
         {

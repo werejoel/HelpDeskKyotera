@@ -117,6 +117,7 @@ namespace HelpDeskKyotera.ViewModels.Tickets
 
     public class TicketDetailsViewModel
     {
+        public Guid RequesterId { get; set; }
         public Guid TicketId { get; set; }
         public string TicketNumber { get; set; } = null!;
         public string Title { get; set; } = null!;

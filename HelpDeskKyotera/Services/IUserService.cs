@@ -18,5 +18,6 @@ namespace HelpDeskKyotera.Services
         //New Methods for User Claim Management
         Task<UserClaimsEditViewModel?> GetClaimsForEditAsync(Guid userId);
         Task<IdentityResult> UpdateClaimsAsync(Guid userId, IEnumerable<Guid> selectedClaimIds);
+        Task<IdentityResult> SetEmailConfirmedAsync(Guid userId, bool confirmed);
     }
 }

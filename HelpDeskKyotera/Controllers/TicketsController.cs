@@ -39,7 +39,17 @@ namespace HelpDeskKyotera.Controllers
                     PriorityId = priorityId,
                     CategoryId = categoryId
                 };
-                var result = await _ticketService.GetTicketsAsync(filter);
+                PagedResult<TicketListItemViewModel> result;
+                // Non-staff/non-admin users should only see their own tickets
+                if (!User.IsInRole("Admin") && !User.IsInRole("Staff") && !User.IsInRole("Ceo"))
+                {
+                    var userId = GetCurrentUserId();
+                    result = await _ticketService.GetMyTicketsAsync(userId, pageNumber, 10);
+                }
+                else
+                {
+                    result = await _ticketService.GetTicketsAsync(filter);
+                }
 
                 // Load filter options for dropdowns
                 var statuses = await _ticketService.GetStatusesAsync();
@@ -109,6 +119,14 @@ namespace HelpDeskKyotera.Controllers
                 var ticket = await _ticketService.GetTicketDetailsAsync(id.Value);
                 if (ticket == null)
                     return NotFound();
+
+                // Restrict access: only Admin/Staff/Ceo or the requester may view
+                if (!User.IsInRole("Admin") && !User.IsInRole("Staff") && !User.IsInRole("Ceo"))
+                {
+                    var userId = GetCurrentUserId();
+                    if (ticket.RequesterId != userId)
+                        return NotFound(); // hide existence
+                }
 
                 var statuses = await _ticketService.GetStatusesAsync();
                 var users = _context.Users.Where(u => u.IsActive).Select(u => new { u.Id, u.UserName }).ToList();
@@ -420,6 +438,19 @@ namespace HelpDeskKyotera.Controllers
             try
             {
                 var userId = GetCurrentUserId();
+                // Only allow commenting if requester or staff/admin
+                if (!User.IsInRole("Admin") && !User.IsInRole("Staff") && !User.IsInRole("Ceo"))
+                {
+                    var ticketOwner = await _context.Tickets.AsNoTracking()
+                        .Where(t => t.TicketId == ticketId)
+                        .Select(t => t.RequesterId)
+                        .FirstOrDefaultAsync();
+                    if (ticketOwner == Guid.Empty || ticketOwner != userId)
+                    {
+                        TempData["Error"] = "You are not authorized to comment on this ticket.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
                 var comment = new Comment
                 {
                     CommentId = Guid.NewGuid(),
@@ -457,6 +488,20 @@ namespace HelpDeskKyotera.Controllers
 
             try
             {
+                var userId = GetCurrentUserId();
+                // Only allow uploads if requester or staff/admin
+                if (!User.IsInRole("Admin") && !User.IsInRole("Staff") && !User.IsInRole("Ceo"))
+                {
+                    var ticketOwner = await _context.Tickets.AsNoTracking()
+                        .Where(t => t.TicketId == ticketId)
+                        .Select(t => t.RequesterId)
+                        .FirstOrDefaultAsync();
+                    if (ticketOwner == Guid.Empty || ticketOwner != userId)
+                    {
+                        TempData["Error"] = "You are not authorized to upload attachments for this ticket.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
                 // Validate file size (max 10 MB)
                 const long maxFileSize = 10 * 1024 * 1024;
                 if (file.Length > maxFileSize)
@@ -486,7 +531,7 @@ namespace HelpDeskKyotera.Controllers
                     await file.CopyToAsync(stream);
                 }
 
-                var userId = GetCurrentUserId();
+                
                 var attachment = new Attachment
                 {
                     AttachmentId = Guid.NewGuid(),

@@ -168,6 +168,7 @@ namespace HelpDeskKyotera.Services
 
                 return new TicketDetailsViewModel
                 {
+                    RequesterId = ticket.RequesterId,
                     TicketId = ticket.TicketId,
                     TicketNumber = ticket.TicketNumber,
                     Title = ticket.Title,

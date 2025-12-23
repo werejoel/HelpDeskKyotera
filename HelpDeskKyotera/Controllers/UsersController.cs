@@ -234,6 +234,32 @@ namespace HelpDeskKyotera.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
+        // Admin action to confirm/unconfirm a user's email
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SetEmailConfirmed(Guid id, bool confirm)
+        {
+            if (id == Guid.Empty) return NotFound();
+            try
+            {
+                var result = await _userService.SetEmailConfirmedAsync(id, confirm);
+                if (result.Succeeded)
+                {
+                    SetSuccess(confirm ? "Email was marked as confirmed." : "Email was marked as unconfirmed.");
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+                SetError(string.Join(" ", result.Errors.Select(e => e.Description)));
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error setting email confirmed for user {UserId}", id);
+                SetError("An unexpected error occurred while updating email confirmation.");
+                return RedirectToAction(nameof(Details), new { id });
+            }
+        }
         // Requires multiple roles (OR): Admin or Ceo
         [Authorize(Roles = "Admin,Ceo")] // OR semantics
         [HttpGet]
