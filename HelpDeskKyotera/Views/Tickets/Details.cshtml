@@ -114,10 +114,10 @@
                     </div>
 
                     <!-- Staff Actions -->
-                    @if (User.IsInRole("Staff") || User.IsInRole("Admin"))
+                    @if (User.IsInRole("Admin") || User.IsInRole("Ceo"))
                     {
                         <div class="bg-light p-3 rounded mb-4 border-start border-primary border-5">
-                            <h6 class="mb-3">Staff Actions</h6>
+                            <h6 class="mb-3">Admin Actions</h6>
                             <form method="post" class="d-flex gap-2 flex-wrap">
                                 <input type="hidden" name="id" value="@Model.TicketId" />
                                 @if (Model.StatusName != "Resolved" && Model.StatusName != "Closed")

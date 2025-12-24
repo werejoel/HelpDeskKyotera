@@ -40,7 +40,7 @@ namespace HelpDeskKyotera.Controllers
                     CategoryId = categoryId
                 };
                 PagedResult<TicketListItemViewModel> result;
-                // Only Admin and CEO can see all tickets; others see only their own
+                // Only Admin and CEO can see all tickets; other users see only their own tickets
                 if (!User.IsInRole("Admin") && !User.IsInRole("Ceo"))
                 {
                     var userId = GetCurrentUserId();
@@ -58,6 +58,11 @@ namespace HelpDeskKyotera.Controllers
                 ViewBag.Statuses = new SelectList(statuses, "StatusId", "Name");
                 ViewBag.Priorities = new SelectList(priorities, "PriorityId", "Name");
                 ViewBag.Categories = new SelectList(categories, "CategoryId", "Name");
+                // Populate users for bulk assign dropdown
+                var users = _context.Users.Where(u => u.IsActive)
+                                          .Select(u => new { u.Id, u.UserName })
+                                          .ToList();
+                ViewBag.Users = new SelectList(users, "Id", "UserName");
                 ViewBag.SearchTerm = search;
                 ViewBag.SelectedStatus = statusId;
                 ViewBag.SelectedPriority = priorityId;
@@ -125,7 +130,7 @@ namespace HelpDeskKyotera.Controllers
                 {
                     var userId = GetCurrentUserId();
                     if (ticket.RequesterId != userId)
-                        return NotFound(); // hide existence
+                        return NotFound();
                 }
 
                 var statuses = await _ticketService.GetStatusesAsync();
@@ -301,7 +306,7 @@ namespace HelpDeskKyotera.Controllers
         // POST: Tickets/Assign/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Ceo")]
         public async Task<IActionResult> Assign(Guid id, Guid? assignedToId)
         {
             try
@@ -327,7 +332,7 @@ namespace HelpDeskKyotera.Controllers
         // POST: Tickets/UpdateStatus/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Ceo")]
         public async Task<IActionResult> UpdateStatus(Guid id, Guid statusId)
         {
             try
@@ -347,7 +352,7 @@ namespace HelpDeskKyotera.Controllers
         // POST: Tickets/Resolve/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Ceo")]
         public async Task<IActionResult> Resolve(Guid id)
         {
             try
@@ -367,7 +372,7 @@ namespace HelpDeskKyotera.Controllers
         // POST: Tickets/Reopen/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Ceo")]
         public async Task<IActionResult> Reopen(Guid id)
         {
             try

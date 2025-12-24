@@ -213,14 +213,17 @@
                         </p>
                     </div>
                     <div class="col-md-6 text-end">
-                        <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" 
-                                data-bs-target="#bulkAssignModal">
-                            <i class="bi bi-person-check"></i> Assign
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" 
-                                data-bs-target="#bulkStatusModal">
-                            <i class="bi bi-arrow-repeat"></i> Update Status
-                        </button>
+                        @if (User.IsInRole("Admin") || User.IsInRole("Ceo"))
+                        {
+                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" 
+                                    data-bs-target="#bulkAssignModal">
+                                <i class="bi bi-person-check"></i> Assign
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" 
+                                    data-bs-target="#bulkStatusModal">
+                                <i class="bi bi-arrow-repeat"></i> Update Status
+                            </button>
+                        }
                     </div>
                 </div>
             </div>
@@ -343,5 +346,129 @@
                 });
             });
         });
+    </script>
+}
+
+<!-- Anti-forgery token for AJAX POSTs -->
+<form id="antiForgeryForm">@Html.AntiForgeryToken()</form>
+
+<!-- Bulk Assign Modal -->
+@if (User.IsInRole("Admin") || User.IsInRole("Ceo"))
+{
+    <div class="modal fade" id="bulkAssignModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assign Selected Tickets</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="bulkAssignUser" class="form-label">Assign To</label>
+                        <select class="form-select" id="bulkAssignUser">
+                            <option value="">-- Select User --</option>
+                                                   @if (ViewBag.Users != null)
+                                                   {
+                                                       @foreach (var user in ViewBag.Users)
+                                                       {
+                                                           <option value="@user.Value">@user.Text</option>
+                                                       }
+                                                   }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="bulkAssignTickets()">Assign</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Status Modal -->
+    <div class="modal fade" id="bulkStatusModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="bulkStatus" class="form-label">New Status</label>
+                        <select class="form-select" id="bulkStatus">
+                            <option value="">-- Select Status --</option>
+                                                   @if (ViewBag.Statuses != null)
+                                                   {
+                                                       @foreach (var status in ViewBag.Statuses)
+                                                       {
+                                                           <option value="@status.Value">@status.Text</option>
+                                                       }
+                                                   }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="bulkUpdateStatus()">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function postBulk(url, payloads) {
+            const tokenInput = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]');
+            const token = tokenInput ? tokenInput.value : null;
+            const requests = payloads.map(data => {
+                const params = new URLSearchParams();
+                for (const key in data) params.append(key, data[key]);
+                if (token) params.append('__RequestVerificationToken', token);
+                return fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params.toString()
+                }).then(r => ({ ok: r.ok, status: r.status }));
+            });
+
+            const results = await Promise.all(requests);
+            const failed = results.filter(r => !r.ok);
+            return { ok: failed.length === 0, results };
+        }
+
+        async function bulkAssignTickets() {
+            const selectedTickets = Array.from(document.querySelectorAll('.ticket-checkbox:checked')).map(c => c.value);
+            const assignedToId = document.getElementById('bulkAssignUser').value;
+            if (!selectedTickets.length || !assignedToId) {
+                alert('Please select tickets and a user.');
+                return;
+            }
+
+            const url = '@Url.Action("Assign")';
+            const payloads = selectedTickets.map(id => ({ id, assignedToId }));
+            const res = await postBulk(url, payloads);
+            if (!res.ok) {
+                alert('Some assignments failed. Please try again or contact the administrator.');
+            }
+            // reload to reflect changes
+            window.location.reload();
+        }
+
+        async function bulkUpdateStatus() {
+            const selectedTickets = Array.from(document.querySelectorAll('.ticket-checkbox:checked')).map(c => c.value);
+            const statusId = document.getElementById('bulkStatus').value;
+            if (!selectedTickets.length || !statusId) {
+                alert('Please select tickets and a status.');
+                return;
+            }
+
+            const url = '@Url.Action("UpdateStatus")';
+            const payloads = selectedTickets.map(id => ({ id, statusId }));
+            const res = await postBulk(url, payloads);
+            if (!res.ok) {
+                alert('Some status updates failed. Please try again or contact the administrator.');
+            }
+            window.location.reload();
+        }
     </script>
 }
