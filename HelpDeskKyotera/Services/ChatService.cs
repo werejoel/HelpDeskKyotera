@@ -31,9 +31,11 @@ public class ChatService : IChatService
     public async Task<ChatConversation?> GetConversationAsync(Guid conversationId)
     {
         return await _db.ChatConversations
-            .Include(c => c.Messages.OrderBy(m => m.CreatedOn))
+            .Where(c => c.ChatConversationId == conversationId)
+            .Include(c => c.Messages)
+                .ThenInclude(m => m.Sender)
             .Include(c => c.Participants)
-            .FirstOrDefaultAsync(c => c.ChatConversationId == conversationId);
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<ChatMessage>> GetMessagesAsync(Guid conversationId, int page = 0, int pageSize = 100)
@@ -66,10 +68,11 @@ public class ChatService : IChatService
 
     public async Task<IEnumerable<ChatConversation>> GetUserConversationsAsync(Guid userId)
     {
-        return await _db.ChatParticipants
-            .Where(p => p.UserId == userId)
-            .Select(p => p.Conversation)
-            .Include(c => c.Messages.OrderByDescending(m => m.CreatedOn).Take(1))
+        return await _db.ChatConversations
+            .Where(c => c.Participants.Any(p => p.UserId == userId))
+            .Include(c => c.Participants)
+            .Include(c => c.Messages)
+                .ThenInclude(m => m.Sender)
             .ToListAsync();
     }
 }

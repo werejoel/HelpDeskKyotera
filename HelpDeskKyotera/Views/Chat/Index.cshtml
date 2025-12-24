@@ -15,7 +15,7 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.11/signalr.min.js" integrity="" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@@microsoft/signalr@@9.0.0/dist/browser/signalr.js"></script>
 @{
     var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 }
@@ -23,17 +23,23 @@
     const conversationId = '@Model.ChatConversationId';
     const currentUserId = '@userId';
 
-    const connection = new signalR.HubConnectionBuilder()
-        .withUrl('/chathub')
-        .withAutomaticReconnect()
-        .build();
+    // Create SignalR connection if the library loaded successfully
+    let connection = null;
+    if (window.signalR) {
+        connection = new signalR.HubConnectionBuilder()
+            .withUrl('/chathub')
+            .withAutomaticReconnect()
+            .build();
 
-    connection.on('ReceiveMessage', (payload) => {
-        if (payload.conversationId !== conversationId && payload.ConversationId !== conversationId) return;
-        const sender = payload.senderName ?? payload.SenderName ?? 'Someone';
-        const body = payload.body ?? payload.Body ?? '';
-        appendMessage(sender, body, payload.senderId ?? payload.SenderId);
-    });
+        connection.on('ReceiveMessage', (payload) => {
+            if (payload.conversationId !== conversationId && payload.ConversationId !== conversationId) return;
+            const sender = payload.senderName ?? payload.SenderName ?? 'Someone';
+            const body = payload.body ?? payload.Body ?? '';
+            appendMessage(sender, body, payload.senderId ?? payload.SenderId);
+        });
+    } else {
+        console.warn('SignalR library not available. Chat realtime features disabled.');
+    }
 
     function appendMessage(sender, body, senderId) {
         const container = document.getElementById('messages');
@@ -53,22 +59,50 @@
           .replaceAll("'", '&#039;');
     }
 
-    connection.start().then(async () => {
-        await connection.invoke('JoinConversation', conversationId);
+    if (connection) {
+        connection.start().then(async () => {
+            console.info('SignalR connected');
+            try {
+                await connection.invoke('JoinConversation', conversationId);
+            } catch (e) { console.error('JoinConversation failed', e); }
 
-        // load recent messages via fetch
+            // load recent messages via fetch
+            fetch(`/api/chat/messages?conversationId=${conversationId}`)
+                .then(r => r.json())
+                .then(list => {
+                    list.forEach(m => appendMessage(m.senderName ?? (m.sender?.firstName + ' ' + m.sender?.lastName), m.body, m.senderId));
+                })
+                .catch(err => console.error('Failed to load messages', err));
+        }).catch(err => {
+            console.error('SignalR connection failed', err);
+            const container = document.getElementById('messages');
+            container.innerHTML = '<div class="text-danger p-3">Unable to connect to chat server. Check console for details.</div>';
+        });
+    } else {
+        // Even if SignalR is not available, still attempt to load recent messages so UI shows content.
         fetch(`/api/chat/messages?conversationId=${conversationId}`)
             .then(r => r.json())
             .then(list => {
-                list.forEach(m => appendMessage(m.senderName ?? m.sender?.firstName + ' ' + m.sender?.lastName, m.body, m.senderId));
-            });
+                list.forEach(m => appendMessage(m.senderName ?? (m.sender?.firstName + ' ' + m.sender?.lastName), m.body, m.senderId));
+            })
+            .catch(err => console.error('Failed to load messages', err));
+    }
+
+    connection.onclose(err => {
+        console.warn('SignalR connection closed', err);
     });
 
     document.getElementById('sendBtn').addEventListener('click', async () => {
         const input = document.getElementById('messageInput');
         const text = input.value.trim();
         if (!text) return;
-        await connection.invoke('SendMessageToConversation', conversationId, text);
-        input.value = '';
+        if (connection) {
+            try {
+                await connection.invoke('SendMessageToConversation', conversationId, text);
+                input.value = '';
+            } catch (e) { console.error('Send failed', e); }
+        } else {
+            console.warn('Cannot send message: real-time connection not established.');
+        }
     });
 </script>
