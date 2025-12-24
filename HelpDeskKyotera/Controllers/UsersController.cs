@@ -79,9 +79,8 @@ namespace HelpDeskKyotera.Controllers
                 return View(model);
             }
         }
-        // Requires multiple roles (AND): Both Admin and Ceo
-        [Authorize(Roles = "Admin")]
-        [Authorize(Roles = "Ceo")]
+        // Allow Admin or Ceo to edit users
+        [Authorize(Roles = "Admin,Ceo")]
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
@@ -102,9 +101,8 @@ namespace HelpDeskKyotera.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-        // Requires multiple roles (AND): Both Admin and Ceo
-        [Authorize(Roles = "Admin")]
-        [Authorize(Roles = "Ceo")] // AND overall
+        // Allow Admin or Ceo to submit edits
+        [Authorize(Roles = "Admin,Ceo")] // OR semantics
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UserEditViewModel model)

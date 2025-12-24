@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -33,6 +34,12 @@ namespace HelpDeskKyotera.ViewModels.Users
 
         [Display(Name = "Email Confirmed?")]
         public bool EmailConfirmed { get; set; }
+
+        [Display(Name = "Department")]
+        public Guid? DepartmentId { get; set; }
+
+        // Populated for the edit form
+        public IEnumerable<SelectListItem>? Departments { get; set; }
 
         // Keep this posted via hidden input; adding [HiddenInput] is optional since your view already posts it.
         [Required(ErrorMessage = "Concurrency token is missing. Please reload and try again.")]

@@ -4,6 +4,7 @@ using HelpDeskKyotera.Services;
 using HelpDeskKyotera.ViewModels;
 using HelpDeskKyotera.ViewModels.Users;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -140,7 +141,7 @@ namespace HelpDeskKyotera.Services
             var user = await _userManager.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
             if (user == null)
                 return null;
-            return new UserEditViewModel
+            var vm = new UserEditViewModel
             {
                 Id = user.Id,
                 FirstName = user.FirstName,
@@ -151,6 +152,16 @@ namespace HelpDeskKyotera.Services
                 EmailConfirmed = user.EmailConfirmed,
                 ConcurrencyStamp = user.ConcurrencyStamp
             };
+
+            // Populate departments for selection
+            var departments = await _dbContext.Departments
+                .AsNoTracking()
+                .OrderBy(d => d.Name)
+                .Select(d => new SelectListItem { Value = d.DepartmentId.ToString(), Text = d.Name })
+                .ToListAsync();
+            vm.Departments = departments;
+            vm.DepartmentId = user.DepartmentId;
+            return vm;
         }
         // Updates a user with optimistic concurrency check via ConcurrencyStamp.
         public async Task<IdentityResult> UpdateAsync(UserEditViewModel model)
@@ -201,6 +212,8 @@ namespace HelpDeskKyotera.Services
                     user.PhoneNumber = model.PhoneNumber;
                     user.IsActive = model.IsActive;
                     user.EmailConfirmed = model.EmailConfirmed;
+                    // Update department assignment
+                    user.DepartmentId = model.DepartmentId;
                     user.ModifiedOn = DateTime.UtcNow;
                     var update = await _userManager.UpdateAsync(user);
                     if (!update.Succeeded)

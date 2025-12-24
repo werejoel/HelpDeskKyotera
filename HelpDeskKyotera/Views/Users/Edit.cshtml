@@ -90,6 +90,14 @@
                                     <label asp-for="EmailConfirmed" class="form-check-label"></label>
                                 </div>
                             </div>
+
+                            <div class="col-12 mt-2">
+                                <label asp-for="DepartmentId" class="form-label"></label>
+                                <select asp-for="DepartmentId" class="form-select" asp-items="Model.Departments">
+                                    <option value="">-- No Department --</option>
+                                </select>
+                                <span asp-validation-for="DepartmentId" class="text-danger"></span>
+                            </div>
                         </div>
 
                         <!-- Actions -->
