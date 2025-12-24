@@ -408,11 +408,11 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     @if (isAuthenticated && !isAdmin)
                     {
-                        <li class="nav-item">
+                        @* <li class="nav-item">
                             <a class="nav-link" asp-controller="UserDashboard" asp-action="Index">
                                 <i class="bi bi-graph-up"></i> Dashboard
                             </a>
-                        </li>
+                        </li> *@
                     }
                     @if (isAuthenticated)
                     {
