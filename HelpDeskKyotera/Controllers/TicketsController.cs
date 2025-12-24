@@ -40,8 +40,8 @@ namespace HelpDeskKyotera.Controllers
                     CategoryId = categoryId
                 };
                 PagedResult<TicketListItemViewModel> result;
-                // Non-staff/non-admin users should only see their own tickets
-                if (!User.IsInRole("Admin") && !User.IsInRole("Staff") && !User.IsInRole("Ceo"))
+                // Only Admin and CEO can see all tickets; others see only their own
+                if (!User.IsInRole("Admin") && !User.IsInRole("Ceo"))
                 {
                     var userId = GetCurrentUserId();
                     result = await _ticketService.GetMyTicketsAsync(userId, pageNumber, 10);
@@ -120,8 +120,8 @@ namespace HelpDeskKyotera.Controllers
                 if (ticket == null)
                     return NotFound();
 
-                // Restrict access: only Admin/Staff/Ceo or the requester may view
-                if (!User.IsInRole("Admin") && !User.IsInRole("Staff") && !User.IsInRole("Ceo"))
+                // Only Admin/CEO can view any ticket; users can only view their own tickets (as requester)
+                if (!User.IsInRole("Admin") && !User.IsInRole("Ceo"))
                 {
                     var userId = GetCurrentUserId();
                     if (ticket.RequesterId != userId)
@@ -217,6 +217,14 @@ namespace HelpDeskKyotera.Controllers
                 var ticketDetails = await _ticketService.GetTicketDetailsAsync(id.Value);
                 if (ticketDetails == null)
                     return NotFound();
+
+                // Staff can only edit tickets assigned to them; Admins can edit any
+                if (!User.IsInRole("Admin"))
+                {
+                    var userId = GetCurrentUserId();
+                    if (ticketDetails.AssignedToId != userId)
+                        return NotFound();
+                }
 
                 var model = new TicketEditViewModel
                 {
@@ -387,6 +395,10 @@ namespace HelpDeskKyotera.Controllers
             {
                 var ticketDetails = await _ticketService.GetTicketDetailsAsync(id.Value);
                 if (ticketDetails == null)
+                    return NotFound();
+
+                // Admin-only; additional safety check
+                if (!User.IsInRole("Admin"))
                     return NotFound();
 
                 return View(ticketDetails);
