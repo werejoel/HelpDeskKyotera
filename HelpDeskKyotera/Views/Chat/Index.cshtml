@@ -15,17 +15,18 @@
     </div>
 </div>
 
-<script src="https://unpkg.com/@@microsoft/signalr@@9.0.0/dist/browser/signalr.js"></script>
 @{
+    var signalrCdn = "https://cdn.jsdelivr.net/npm/@microsoft/signalr@9.0.0/dist/browser/signalr.min.js";
     var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 }
+<script src="@signalrCdn"></script>
 <script>
     const conversationId = '@Model.ChatConversationId';
     const currentUserId = '@userId';
 
     // Create SignalR connection if the library loaded successfully
     let connection = null;
-    if (window.signalR) {
+    if (typeof signalR !== 'undefined') {
         connection = new signalR.HubConnectionBuilder()
             .withUrl('/chathub')
             .withAutomaticReconnect()
@@ -88,9 +89,11 @@
             .catch(err => console.error('Failed to load messages', err));
     }
 
-    connection.onclose(err => {
-        console.warn('SignalR connection closed', err);
-    });
+    if (connection) {
+        connection.onclose(err => {
+            console.warn('SignalR connection closed', err);
+        });
+    }
 
     document.getElementById('sendBtn').addEventListener('click', async () => {
         const input = document.getElementById('messageInput');
@@ -102,7 +105,21 @@
                 input.value = '';
             } catch (e) { console.error('Send failed', e); }
         } else {
-            console.warn('Cannot send message: real-time connection not established.');
+            // Fallback: POST message to API so it is persisted and broadcast server-side
+            try {
+                const res = await fetch('/api/chat/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ conversationId: conversationId, body: text })
+                });
+                if (res.ok) {
+                    const payload = await res.json();
+                    appendMessage(payload.senderName ?? (payload.sender?.firstName + ' ' + payload.sender?.lastName), payload.body, payload.senderId);
+                    input.value = '';
+                } else {
+                    console.error('Fallback send failed', await res.text());
+                }
+            } catch (e) { console.error('Fallback send error', e); }
         }
     });
 </script>
