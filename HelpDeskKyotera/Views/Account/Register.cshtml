@@ -5,10 +5,87 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<style>
+    :root {
+        --reg-card-radius: 0.9rem;
+        --reg-shadow: 0 10px 30px rgba(15,23,42,0.08);
+    }
+
+    /* Card container */
+    .form-card {
+        border-radius: var(--reg-card-radius);
+        overflow: hidden;
+        box-shadow: var(--reg-shadow);
+        background: #fff;
+    }
+
+    /* Left branding column */
+    .form-card .brand-panel {
+        background: linear-gradient(180deg, rgba(102,126,234,1) 0%, rgba(66,153,225,1) 100%);
+        color: #fff;
+        padding: 2rem 1.5rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: .4rem;
+    }
+
+    .form-card .brand-panel h4 {
+        font-size: 1.25rem;
+        margin-bottom: .25rem;
+    }
+
+    .form-card .brand-panel p {
+        opacity: .95;
+        font-size: .9rem;
+        margin-bottom: 0;
+    }
+
+    /* Form column */
+    .form-card .register-form {
+        padding: 1.6rem 1.2rem;
+        background: #f8f9fb;
+    }
+
+    .register-form h5 { font-size: 1.1rem; }
+
+    .form-control, .form-select {
+        border-radius: .5rem;
+        height: 44px;
+        padding: .5rem .75rem;
+        box-shadow: none;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: rgba(102,126,234,0.9);
+        box-shadow: 0 6px 18px rgba(102,126,234,0.08);
+        outline: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg,#667eea,#6b8cff);
+        border: none;
+        box-shadow: 0 6px 18px rgba(102,126,234,0.08);
+        border-radius: .6rem;
+        height: 46px;
+    }
+
+    .form-check-input { transform: scale(1.05); }
+
+    .alert ul { margin-bottom: 0; }
+
+    @@media (max-width: 767.98px) {
+        .form-card { margin: 0 0.5rem; }
+        .form-card .brand-panel { padding: 1.2rem; }
+        .form-card .register-form { padding: 1rem; }
+    }
+</style>
+
 <div class="container my-3">
     <div class="row mx-auto form-card" style="max-width: 900px;">
         <!-- Left: Welcome/Branding Section -->
-        <div class="col-md-5 d-none d-md-flex flex-column justify-content-center align-items-center" style="background:var(--brand-primary); color:var(--brand-accent); padding:1.5rem;">
+        <div class="col-md-5 d-none d-md-flex flex-column justify-content-center align-items-center brand-panel">
             <div class="text-center">
                 <h4 class="fw-bold mb-2" style="font-size:1.3rem;">Help Desk Kyotera</h4>
                 <p class="mb-3 small">
@@ -18,7 +95,7 @@
             </div>
         </div>
         <!-- Right: Registration Form Section -->
-        <div class="col-md-7 bg-light py-4 px-3">
+        <div class="col-md-7 register-form">
             <h5 class="text-center fw-bold mb-3">Create Your Account</h5>
 
             <form asp-action="Register" method="post" novalidate>
