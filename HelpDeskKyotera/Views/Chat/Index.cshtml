@@ -1,0 +1,74 @@
+@using System.Security.Claims
+@model HelpDeskKyotera.Models.ChatConversation
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-3">
+    <h4>Chat</h4>
+
+    <div id="messages" style="height:400px;overflow:auto;border:1px solid #ddd;padding:10px;background:#fff;"></div>
+
+    <div class="input-group mt-2">
+        <input id="messageInput" class="form-control" placeholder="Type a message..." />
+        <button id="sendBtn" class="btn btn-primary">Send</button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.11/signalr.min.js" integrity="" crossorigin="anonymous"></script>
+@{
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+}
+<script>
+    const conversationId = '@Model.ChatConversationId';
+    const currentUserId = '@userId';
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl('/chathub')
+        .withAutomaticReconnect()
+        .build();
+
+    connection.on('ReceiveMessage', (payload) => {
+        if (payload.conversationId !== conversationId && payload.ConversationId !== conversationId) return;
+        const sender = payload.senderName ?? payload.SenderName ?? 'Someone';
+        const body = payload.body ?? payload.Body ?? '';
+        appendMessage(sender, body, payload.senderId ?? payload.SenderId);
+    });
+
+    function appendMessage(sender, body, senderId) {
+        const container = document.getElementById('messages');
+        const el = document.createElement('div');
+        el.className = senderId === currentUserId ? 'text-end mb-2' : 'text-start mb-2';
+        el.innerHTML = `<strong>${sender}</strong><div>${escapeHtml(body)}</div><small class="text-muted">${new Date().toLocaleString()}</small>`;
+        container.appendChild(el);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function escapeHtml(unsafe) {
+        return unsafe
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+    }
+
+    connection.start().then(async () => {
+        await connection.invoke('JoinConversation', conversationId);
+
+        // load recent messages via fetch
+        fetch(`/api/chat/messages?conversationId=${conversationId}`)
+            .then(r => r.json())
+            .then(list => {
+                list.forEach(m => appendMessage(m.senderName ?? m.sender?.firstName + ' ' + m.sender?.lastName, m.body, m.senderId));
+            });
+    });
+
+    document.getElementById('sendBtn').addEventListener('click', async () => {
+        const input = document.getElementById('messageInput');
+        const text = input.value.trim();
+        if (!text) return;
+        await connection.invoke('SendMessageToConversation', conversationId, text);
+        input.value = '';
+    });
+</script>

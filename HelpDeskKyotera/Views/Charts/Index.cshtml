@@ -1,0 +1,54 @@
+@{
+    ViewData["Title"] = "Charts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3>Charts</h3>
+        <a href="/AdminDashboard" class="btn btn-sm btn-outline-secondary">Back to Dashboard</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <canvas id="ticketsChart" height="120"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    async function loadChartData() {
+        try {
+            const res = await fetch('/api/charts/tickets');
+            if (!res.ok) throw new Error('Unauthorized or network error');
+            const data = await res.json();
+
+            const labels = data.map(d => d.status);
+            const counts = data.map(d => d.count);
+
+            const colors = ['#0d6efd', '#198754', '#ffc107', '#0dcaf0', '#6c757d', '#6f42c1'];
+
+            const ctx = document.getElementById('ticketsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Tickets by Status',
+                        data: counts,
+                        backgroundColor: labels.map((_, i) => colors[i % colors.length])
+                    }]
+                },
+                options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+        }
+        catch (ex) {
+            console.error(ex);
+            const container = document.getElementById('ticketsChart').parentElement;
+            container.innerHTML = '<div class="text-danger">Unable to load chart data. Check permissions or API.</div>';
+        }
+    }
+
+    loadChartData();
+</script>

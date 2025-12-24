@@ -1,0 +1,20 @@
+@model IEnumerable<HelpDeskKyotera.Models.ChatConversation>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-3">
+    <h4>Your Conversations</h4>
+    <ul class="list-group">
+        @foreach(var c in Model)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>Conversation</strong>
+                    @if(c.TicketId != null) { <span class="text-muted">(Ticket: @c.TicketId)</span> }
+                </div>
+                <a class="btn btn-sm btn-outline-primary" href="/Chat?conversationId=@c.ChatConversationId">Open</a>
+            </li>
+        }
+    </ul>
+</div>

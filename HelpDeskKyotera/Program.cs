@@ -62,6 +62,8 @@ namespace HelpDeskKyotera
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<IChatService, ChatService>();
+            builder.Services.AddSignalR();
             builder.Services.AddScoped<IRoleService, RoleService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IClaimsService, ClaimsService>();
@@ -86,6 +88,9 @@ namespace HelpDeskKyotera
             // Add Authentication and Authorization Middleware
             app.UseAuthentication();
             app.UseAuthorization();
+
+            // Map SignalR hubs
+            app.MapHub<HelpDeskKyotera.Hubs.ChatHub>("/chathub");
 
             app.MapControllerRoute(
                 name: "default",
