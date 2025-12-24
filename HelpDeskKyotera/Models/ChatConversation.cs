@@ -9,6 +9,7 @@ public class ChatConversation
 
     // Optional link to a Ticket
     public Guid? TicketId { get; set; }
+    public virtual Ticket? Ticket { get; set; }
 
     public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
 

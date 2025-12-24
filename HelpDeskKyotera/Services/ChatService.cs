@@ -68,9 +68,13 @@ public class ChatService : IChatService
 
     public async Task<IEnumerable<ChatConversation>> GetUserConversationsAsync(Guid userId)
     {
+        // Get conversations where the user is a participant or is the ticket requester
         return await _db.ChatConversations
-            .Where(c => c.Participants.Any(p => p.UserId == userId))
+            .Where(c => c.Participants.Any(p => p.UserId == userId) ||
+                        (c.TicketId != null && c.Ticket!.RequesterId == userId) ||
+                        (c.TicketId != null && c.Ticket!.AssignedToId == userId))
             .Include(c => c.Participants)
+            .Include(c => c.Ticket)
             .Include(c => c.Messages)
                 .ThenInclude(m => m.Sender)
             .ToListAsync();

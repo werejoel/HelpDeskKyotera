@@ -5,16 +5,30 @@
 
 <div class="container mt-3">
     <h4>Your Conversations</h4>
-    <ul class="list-group">
-        @foreach(var c in Model)
-        {
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                    <strong>Conversation</strong>
-                    @if(c.TicketId != null) { <span class="text-muted">(Ticket: @c.TicketId)</span> }
-                </div>
-                <a class="btn btn-sm btn-outline-primary" href="/Chat?conversationId=@c.ChatConversationId">Open</a>
-            </li>
-        }
-    </ul>
+    @if (Model.Any())
+    {
+        <ul class="list-group">
+            @foreach(var c in Model)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        @if(c.TicketId != null && c.Ticket != null)
+                        {
+                            <strong>Ticket @c.Ticket.TicketNumber</strong>
+                            <div class="text-muted small">@c.Ticket.Title</div>
+                        }
+                        else
+                        {
+                            <strong>Conversation @c.ChatConversationId.ToString().Substring(0, 8)</strong>
+                        }
+                    </div>
+                    <a class="btn btn-sm btn-outline-primary" href="/Chat?conversationId=@c.ChatConversationId">Open</a>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <div class="alert alert-info">No conversations yet. Start chatting on a ticket!</div>
+    }
 </div>

@@ -215,7 +215,7 @@ namespace HelpDeskKyotera.Controllers
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                         return Redirect(returnUrl);
 
-                    return RedirectToAction("Profile", "Account");
+                    return RedirectToAction("Index", "UserDashboard");
                 }
 
                 if (result.IsNotAllowed)
