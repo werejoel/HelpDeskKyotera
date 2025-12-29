@@ -1204,22 +1204,26 @@
                                 <i class="bi bi-building text-success me-2"></i> Departments
                             </h5>
                         </div>
-                        <div class="card-body p-0">
+                        <div class="card-body">
                             @if (Model.Departments.Any())
                             {
-                                <div class="list-group list-group-flush">
-                                    @foreach (var dept in Model.Departments.Take(5))
+                                <div class="row g-3 p-3">
+                                    @foreach (var dept in Model.Departments.Take(6))
                                     {
-                                        <a asp-controller="Departments" asp-action="Details" asp-route-id="@dept.DepartmentId" 
-                                           class="list-group-item list-group-item-action px-4 py-3 border-0">
-                                            <div class="d-flex justify-content-between align-items-center">
+                                        <div class="col-12 col-md-6">
+                                            <div class="department-card d-flex align-items-center justify-content-between">
                                                 <div>
                                                     <h6 class="mb-1 fw-semibold">@dept.Name</h6>
-                                                    <small class="text-muted">@(dept.Location?.Name ?? "No location")</small>
+                                                    <div class="small text-muted">@(dept.Location?.Name ?? "No location")</div>
                                                 </div>
-                                                <span class="badge bg-primary rounded-pill">@dept.Users.Count users</span>
+                                                <div class="text-end">
+                                                    <div class="mb-2">
+                                                        <span class="badge bg-primary rounded-pill">@dept.Users.Count users</span>
+                                                    </div>
+                                                    <a asp-controller="Departments" asp-action="Details" asp-route-id="@dept.DepartmentId" class="btn btn-sm btn-outline-primary">Manage</a>
+                                                </div>
                                             </div>
-                                        </a>
+                                        </div>
                                     }
                                 </div>
                             }
