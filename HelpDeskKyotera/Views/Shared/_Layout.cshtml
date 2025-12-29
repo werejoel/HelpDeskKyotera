@@ -531,63 +531,7 @@
 
     <!-- (Global layout no longer renders a sidebar; page-specific sidebars remain in their views) -->
 
-    <!-- Hero Section with Background -->
-    @if (showHero)
-    {
-        <section class="hero-section">
-            <div class="container">
-                <div class="hero-content">
-                    <div class="hero-icon">
-                        <i class="bi bi-headset"></i>
-                    </div>
-                    <h1>Welcome to HelpDesk Kyotera</h1>
-                    <p class="subtitle">
-                        Your complete solution for efficient issue management and exceptional customer support
-                    </p>
-
-                    <div class="hero-features">
-                        <div class="feature-item">
-                            <i class="bi bi-lightning-charge"></i>
-                            <span>Fast Resolution</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="bi bi-shield-check"></i>
-                            <span>Secure & Reliable</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="bi bi-graph-up"></i>
-                            <span>Real-time Analytics</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="bi bi-people"></i>
-                            <span>Team Collaboration</span>
-                        </div>
-                    </div>
-
-                    <div class="hero-buttons">
-                        @if (!isAuthenticated)
-                        {
-                            <a href="@Url.Action("Login", "Account")" class="btn btn-light btn-lg">
-                                <i class="bi bi-box-arrow-in-right"></i>Sign In Now
-                            </a>
-                            <a href="@Url.Action("Register", "Account")" class="btn btn-outline-light btn-lg">
-                                <i class="bi bi-person-plus"></i>Create Account
-                            </a>
-                        }
-                        else
-                        {
-                            <a href="@Url.Action("Index", "UserDashboard")" class="btn btn-light btn-lg">
-                                <i class="bi bi-graph-up"></i>Go to Dashboard
-                            </a>
-                            <a href="@Url.Action("Index", "Tickets")" class="btn btn-outline-light btn-lg">
-                                <i class="bi bi-ticket"></i>View Tickets
-                            </a>
-                        }
-                    </div>
-                </div>
-            </div>
-        </section>
-    }
+    <!-- Hero is rendered by page-specific views (e.g., Views/Home/Index.cshtml) -->
 
     <!-- Main Content -->
     <main id="mainContent">
@@ -632,7 +576,7 @@
                 <div class="col-md-4 mb-3 mb-md-0">
                     <h6 class="fw-bold mb-2">Quick Links</h6>
                     <ul class="list-unstyled small">
-                        <li><a href="@Url.Action("Index", "Home")" class="text-white-50 text-decoration-none">Home</a></li>
+                        <li><a href="@(Url.Action("Index", "Home") + "#hero")" class="text-white-50 text-decoration-none">Home</a></li>
                         <li><a href="@Url.Action("Privacy", "Home")" class="text-white-50 text-decoration-none">Privacy Policy</a></li>
                         <li><a href="mailto:support@helpdeskkyotera.com" class="text-white-50 text-decoration-none">Contact Support</a></li>
                     </ul>

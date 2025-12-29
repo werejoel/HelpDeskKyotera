@@ -125,7 +125,9 @@ namespace HelpDeskKyotera.Services
             if (!await _userManager.IsEmailConfirmedAsync(user))
                 return SignInResult.NotAllowed;
 
-            var result = await _signInManager.PasswordSignInAsync(user.UserName!, model.Password, model.RememberMe, lockoutOnFailure: false);
+            // Force non-persistent sign-in to prevent automatic sign-in across browser restarts.
+            // This prevents the application from automatically signing in the previous user when the app runs.
+            var result = await _signInManager.PasswordSignInAsync(user.UserName!, model.Password, isPersistent: false, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {

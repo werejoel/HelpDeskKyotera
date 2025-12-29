@@ -1,6 +1,38 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <h1 class="mb-3">@ViewData["Title"]</h1>
+                    <p class="text-muted">This Privacy Policy explains how HelpDesk Kyotera collects, uses, and protects your personal information when you use our service.</p>
+
+                    <hr />
+
+                    <h5 class="mt-4">1. Information We Collect</h5>
+                    <p class="text-muted small">We may collect personal information such as your name, email address, phone number, and any information you include in support tickets or profile settings.</p>
+
+                    <h5 class="mt-4">2. How We Use Information</h5>
+                    <p class="text-muted small">Information is used to operate, maintain, and provide the features of the service, to communicate with you, and to improve our offerings.</p>
+
+                    <h5 class="mt-4">3. Cookies and Tracking</h5>
+                    <p class="text-muted small">We may use cookies and similar technologies to collect usage information and improve the user experience. You can control cookies via your browser settings.</p>
+
+                    <h5 class="mt-4">4. Data Retention</h5>
+                    <p class="text-muted small">We retain personal data for as long as necessary to fulfill the purposes outlined in this policy or as required by law.</p>
+
+                    <h5 class="mt-4">5. Sharing and Disclosure</h5>
+                    <p class="text-muted small">We do not sell personal information. We may share information with trusted partners who assist in providing the service, always under appropriate confidentiality safeguards.</p>
+
+                    <h5 class="mt-4">6. Contact</h5>
+                    <p class="text-muted small">If you have questions about this policy, contact us at <a href="mailto:support@helpdeskkyotera.com">support@helpdeskkyotera.com</a>.</p>
+
+                    <div class="text-muted small mt-4">Last updated: @DateTime.Now.ToString("MMMM dd, yyyy")</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
