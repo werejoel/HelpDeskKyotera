@@ -2,6 +2,7 @@ using HelpDeskKyotera.Data;
 using HelpDeskKyotera.Models;
 using HelpDeskKyotera.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 
 namespace HelpDeskKyotera
@@ -84,6 +85,23 @@ namespace HelpDeskKyotera
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            // One-time middleware: clear any existing application cookie on first request
+            // This prevents the app from restoring a previous authenticated session after restart.
+            app.Use(async (context, next) =>
+            {
+                try
+                {
+                    if (!HelpDeskKyotera.Services.AuthStartupHelper.Cleared)
+                    {
+                        // Sign out the Identity application cookie (if present)
+                        await context.SignOutAsync(Microsoft.AspNetCore.Identity.IdentityConstants.ApplicationScheme);
+                        HelpDeskKyotera.Services.AuthStartupHelper.Cleared = true;
+                    }
+                }
+                catch { }
+                await next();
+            });
 
             // Add Authentication and Authorization Middleware
             app.UseAuthentication();
