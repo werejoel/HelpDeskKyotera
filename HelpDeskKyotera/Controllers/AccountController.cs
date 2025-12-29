@@ -14,11 +14,16 @@ namespace HelpDeskKyotera.Controllers
     {
         private readonly IAccountService _accountService;
         private readonly ILogger<AccountController> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public AccountController(IAccountService accountService, ILogger<AccountController> logger)
+        public AccountController(IAccountService accountService, ILogger<AccountController> logger,
+            UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             _accountService = accountService;
             _logger = logger;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         [AllowAnonymous]
@@ -231,6 +236,90 @@ namespace HelpDeskKyotera.Controllers
                 ModelState.AddModelError("", "An unexpected error occurred. Please try again later.");
                 return View(model);
             }
+        }
+
+        // GET: /Account/ExternalLogin
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult ExternalLogin(string provider, string? returnUrl = null)
+        {
+            // Redirect to external provider
+            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return Challenge(properties, provider);
+        }
+
+        // GET: /Account/ExternalLoginCallback
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null, string? remoteError = null)
+        {
+            if (remoteError != null)
+            {
+                _logger.LogWarning("External login error: {Error}", remoteError);
+                TempData["Error"] = "External login error. Please try again.";
+                return RedirectToAction(nameof(Login));
+            }
+
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                TempData["Error"] = "Unable to load external login information.";
+                return RedirectToAction(nameof(Login));
+            }
+
+            // Try sign-in with existing external login
+            var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
+            if (signInResult.Succeeded)
+            {
+                return LocalRedirect(returnUrl ?? Url.Action("Index", "UserDashboard"));
+            }
+
+            // If user does not have account, create one from external claims if email present
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(email))
+            {
+                TempData["Error"] = "Email claim not received from external provider.";
+                return RedirectToAction(nameof(Login));
+            }
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                user = new ApplicationUser
+                {
+                    UserName = email,
+                    Email = email,
+                    FirstName = info.Principal.FindFirstValue(ClaimTypes.GivenName),
+                    LastName = info.Principal.FindFirstValue(ClaimTypes.Surname),
+                    EmailConfirmed = true,
+                    IsActive = true,
+                    CreatedOn = DateTime.UtcNow
+                };
+
+                var createResult = await _userManager.CreateAsync(user);
+                if (!createResult.Succeeded)
+                {
+                    _logger.LogWarning("Failed to create local user for external login: {Errors}", string.Join(',', createResult.Errors.Select(e => e.Description)));
+                    TempData["Error"] = "Failed to create local account.";
+                    return RedirectToAction(nameof(Login));
+                }
+
+                // Assign default role
+                await _userManager.AddToRoleAsync(user, "User");
+            }
+
+            // Link the external login
+            var addLoginResult = await _userManager.AddLoginAsync(user, info);
+            if (!addLoginResult.Succeeded)
+            {
+                _logger.LogWarning("Failed to link external login: {Errors}", string.Join(',', addLoginResult.Errors.Select(e => e.Description)));
+            }
+
+            // Sign in the user
+            await _signInManager.SignInAsync(user, isPersistent: false);
+
+            return LocalRedirect(returnUrl ?? Url.Action("Index", "UserDashboard"));
         }
 
         [HttpGet]

@@ -3,6 +3,7 @@ using HelpDeskKyotera.Models;
 using HelpDeskKyotera.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
 
 namespace HelpDeskKyotera
@@ -55,6 +56,18 @@ namespace HelpDeskKyotera
                 // If the AccessDenied isn't set, ASP.NET Core defaults the path to /Account/AccessDenied
                 options.AccessDeniedPath = "/Account/AccessDenied"; // Set your access denied path here
             });
+
+            // External authentication providers (Google)
+            // Configure using appsettings keys: Authentication:Google:ClientId and ClientSecret
+            builder.Services.AddAuthentication()
+                .AddGoogle(options =>
+                {
+                    options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
+                    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
+                    // Optional: request additional scopes
+                    options.Scope.Add("profile");
+                    options.SaveTokens = true;
+                });
 
 
 
