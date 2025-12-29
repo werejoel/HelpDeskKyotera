@@ -1,0 +1,52 @@
+@* Reusable user dashboard sidebar *@
+@{
+    var firstName = ViewBag.FirstName as string ?? (User.Identity?.IsAuthenticated == true ? User.Identity.Name : "User");
+}
+
+<nav class="card p-3 sidebar-nav">
+    <div class="d-flex align-items-center mb-3">
+        <div class="avatar-circle me-3">@firstName?.Substring(0,1)</div>
+        <div>
+            <div class="fw-bold">@firstName</div>
+            <small class="text-muted">@User.Identity?.Name</small>
+        </div>
+    </div>
+
+    <ul class="nav nav-pills flex-column">
+        <li class="nav-item mb-1">
+            <a class="nav-link" href="@Url.Action("Index", "UserDashboard")"><i class="bi bi-speedometer2 me-2"></i> Overview</a>
+        </li>
+        <li class="nav-item mb-1">
+            <a class="nav-link" href="@Url.Action("MyTickets", "UserDashboard")"><i class="bi bi-ticket-perforated me-2"></i> My Tickets</a>
+        </li>
+        <li class="nav-item mb-1">
+            <a class="nav-link" href="@Url.Action("AssignedTickets", "UserDashboard")"><i class="bi bi-person-lines-fill me-2"></i> Assigned To Me</a>
+        </li>
+        <li class="nav-item mb-1">
+            <a class="nav-link" href="/Tickets/Create"><i class="bi bi-plus-circle me-2"></i> New Ticket</a>
+        </li>
+        <li class="nav-item mb-1">
+            <a class="nav-link" href="@Url.Action("Index","Chat")"><i class="bi bi-chat-left-text me-2"></i> Chat</a>
+        </li>
+        <li class="nav-item mt-3">
+            <a class="nav-link small text-muted" href="@Url.Action("Profile","Account")"><i class="bi bi-person-circle me-2"></i> Profile</a>
+        </li>
+    </ul>
+
+    <style>
+        .sidebar-nav { border-radius: 12px; }
+        .sidebar-nav .avatar-circle { width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#eef2ff;color:#0d6efd;font-weight:700 }
+        .sidebar-nav .nav-link { color: #333; }
+        .sidebar-nav .nav-link.active { background: #0d6efd; color: #fff; }
+    </style>
+
+    <script>
+        // highlight active link
+        (function(){
+            try{
+                const links = document.querySelectorAll('.sidebar-nav .nav-link');
+                links.forEach(l=>{ if (l.href === location.href) l.classList.add('active'); });
+            }catch(e){}
+        })();
+    </script>
+</nav>

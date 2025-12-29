@@ -1,0 +1,41 @@
+@model IEnumerable<HelpDeskKyotera.Models.Notification>
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<div class="container mt-3">
+    <h3 class="h5">Notifications</h3>
+    <div class="list-group mt-3">
+        @if (!Model.Any())
+        {
+            <div class="text-muted small">You have no notifications.</div>
+        }
+        else
+        {
+            foreach (var n in Model)
+            {
+                <div class="list-group-item d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="fw-semibold">@Html.Raw(n.Subject)</div>
+                        <div class="small text-muted mb-1">@Html.Raw(n.Body)</div>
+                        @if (!string.IsNullOrEmpty(n.Link))
+                        {
+                            <a href="@n.Link">Open</a>
+                        }
+                    </div>
+                    <div class="ms-3 text-end">
+                        <div class="small text-muted">@n.CreatedOn.ToString("yyyy-MM-dd HH:mm")</div>
+                        @if (!n.IsRead)
+                        {
+                            <form asp-action="MarkAsRead" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@n.NotificationId" />
+                                <button class="btn btn-sm btn-primary mt-2">Mark as read</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

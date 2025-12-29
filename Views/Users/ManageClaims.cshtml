@@ -1,0 +1,152 @@
+﻿@using HelpDeskKyotera.ViewModels.Users
+@model UserClaimsEditViewModel
+
+@{
+    ViewData["Title"] = "Manage User Claims";
+}
+
+<div class="container mt-2">
+    <div class="mx-auto" style="max-width: 1100px;">
+        <!-- Page header -->
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 pb-2 border-bottom">
+            <div>
+                <h1 class="h4 fw-bold text-primary mb-1">
+                    Manage Claims for <span class="text-dark">@Model.UserName</span>
+                </h1>
+                <p class="text-muted small mb-0">
+                    Assign or remove claims. Only <em>User</em> and <em>Both</em> category claims are shown.
+                </p>
+            </div>
+
+            <!-- Right side buttons -->
+            <div class="d-flex gap-2">
+                <a asp-action="Index" class="btn btn-primary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Users
+                </a>
+                <a asp-action="Details" asp-route-id="@Model.UserId" class="btn btn-success">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Details
+                </a>
+            </div>
+        </div>
+
+        <div class="card shadow border-0 rounded">
+            <!-- Header with actions -->
+            <div class="card-header bg-dark text-white d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-4">
+                    <span class="fw-semibold fs-5"><i class="bi bi-shield-check me-2"></i>Claim Assignments</span>
+                    <div class="d-flex gap-3 align-items-center">
+                        <span class="badge bg-info text-dark fs-6 px-3 py-2 shadow-sm rounded-pill">
+                            <i class="bi bi-list-check me-1"></i>Total: @Model.Claims.Count
+                        </span>
+                        <span class="badge bg-success fs-6 px-3 py-2 shadow-sm rounded-pill" id="selectedCount">
+                            <i class="bi bi-check-circle-fill me-1"></i>Selected: @(Model.Claims.Count(c => c.IsSelected))
+                        </span>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-success btn-sm px-3 shadow-sm" id="selectAllBtn">
+                        <i class="bi bi-check2-square me-1"></i>Select All
+                    </button>
+                    <button type="button" class="btn btn-warning btn-sm px-3 shadow-sm text-dark" id="clearAllBtn">
+                        <i class="bi bi-x-circle me-1"></i>Clear All
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <form asp-action="ManageClaims" method="post" id="claimsForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="UserId" />
+                    <input type="hidden" asp-for="UserName" />
+
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Values.Any(v => v.Errors.Count > 0))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <div class="fw-semibold mb-1">We couldn’t save your changes.</div>
+                            <div class="small text-muted mb-2">Please review the messages below and try again.</div>
+                            <div asp-validation-summary="All"></div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <!-- Claims list in two columns -->
+                    <div class="row" id="claimsList">
+                        @for (int i = 0; i < Model.Claims.Count; i++)
+                        {
+                            var chkId = $"claim_{i}";
+                            var type = Model.Claims[i].ClaimType ?? "";
+                            var value = Model.Claims[i].ClaimValue ?? "";
+                            var desc = Model.Claims[i].Description ?? "";
+
+                            <div class="col-md-6 col-lg-6 mb-3">
+                                <label class="list-group-item rounded shadow-sm border">
+                                    <div class="d-flex align-items-start">
+                                        <input asp-for="Claims[i].IsSelected" class="form-check-input me-2 mt-1" id="@chkId" />
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold">@type : @value</div>
+                                            <div class="text-muted small">
+                                                @(string.IsNullOrWhiteSpace(desc) ? "No description available" : desc)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- hidden fields -->
+                                    <input asp-for="Claims[i].ClaimId" type="hidden" />
+                                    <input asp-for="Claims[i].ClaimType" type="hidden" />
+                                    <input asp-for="Claims[i].ClaimValue" type="hidden" />
+                                    <input asp-for="Claims[i].Description" type="hidden" />
+                                </label>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex justify-content-end gap-2 mt-1">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-save me-1"></i> Save Claims
+                        </button>
+                        <a asp-action="Details" asp-route-id="@Model.UserId" class="btn btn-info px-4">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-footer bg-light small text-muted">
+                Tip: “Select all” and “Clear all” apply to every claim shown on this page.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function ($) {
+            const $list          = $('#claimsList');
+            const $selectAllBtn  = $('#selectAllBtn');
+            const $clearAllBtn   = $('#clearAllBtn');
+            const $selectedCount = $('#selectedCount');
+
+            function updateSelectedCount() {
+                const count = $list.find('input[type="checkbox"]:checked').length;
+                $selectedCount.text('Selected: ' + count);
+            }
+
+            $selectAllBtn.on('click', function () {
+                $list.find('input[type="checkbox"]').prop('checked', true);
+                updateSelectedCount();
+            });
+
+            $clearAllBtn.on('click', function () {
+                $list.find('input[type="checkbox"]').prop('checked', false);
+                updateSelectedCount();
+            });
+
+            $list.on('change', 'input[type="checkbox"]', function () {
+                updateSelectedCount();
+            });
+
+            updateSelectedCount();
+        })(jQuery);
+    </script>
+}

@@ -1,0 +1,48 @@
+﻿@model HelpDeskKyotera.Models.Category
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="mb-0">Create Category</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none" role="alert"></div>
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger small"></span>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ParentId" class="form-label"></label>
+                    <select asp-for="ParentId" class="form-select" asp-items="ViewBag.ParentId">
+                        <option value="">-- None --</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="DefaultTeamId" class="form-label"></label>
+                    <select asp-for="DefaultTeamId" class="form-select" asp-items="ViewBag.DefaultTeamId">
+                        <option value="">-- None --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <input type="submit" value="Create" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

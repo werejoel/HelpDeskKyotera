@@ -1,0 +1,125 @@
+@using System.Security.Claims
+@model HelpDeskKyotera.Models.ChatConversation
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-3">
+    <h4>Chat</h4>
+
+    <div id="messages" style="height:400px;overflow:auto;border:1px solid #ddd;padding:10px;background:#fff;"></div>
+
+    <div class="input-group mt-2">
+        <input id="messageInput" class="form-control" placeholder="Type a message..." />
+        <button id="sendBtn" class="btn btn-primary">Send</button>
+    </div>
+</div>
+
+@{
+    var signalrCdn = "https://cdn.jsdelivr.net/npm/@microsoft/signalr@9.0.0/dist/browser/signalr.min.js";
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+}
+<script src="@signalrCdn"></script>
+<script>
+    const conversationId = '@Model.ChatConversationId';
+    const currentUserId = '@userId';
+
+    // Create SignalR connection if the library loaded successfully
+    let connection = null;
+    if (typeof signalR !== 'undefined') {
+        connection = new signalR.HubConnectionBuilder()
+            .withUrl('/chathub')
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on('ReceiveMessage', (payload) => {
+            if (payload.conversationId !== conversationId && payload.ConversationId !== conversationId) return;
+            const sender = payload.senderName ?? payload.SenderName ?? 'Someone';
+            const body = payload.body ?? payload.Body ?? '';
+            appendMessage(sender, body, payload.senderId ?? payload.SenderId);
+        });
+    } else {
+        console.warn('SignalR library not available. Chat realtime features disabled.');
+    }
+
+    function appendMessage(sender, body, senderId) {
+        const container = document.getElementById('messages');
+        const el = document.createElement('div');
+        el.className = senderId === currentUserId ? 'text-end mb-2' : 'text-start mb-2';
+        el.innerHTML = `<strong>${sender}</strong><div>${escapeHtml(body)}</div><small class="text-muted">${new Date().toLocaleString()}</small>`;
+        container.appendChild(el);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function escapeHtml(unsafe) {
+        return unsafe
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+    }
+
+    if (connection) {
+        connection.start().then(async () => {
+            console.info('SignalR connected');
+            try {
+                await connection.invoke('JoinConversation', conversationId);
+            } catch (e) { console.error('JoinConversation failed', e); }
+
+            // load recent messages via fetch
+            fetch(`/api/chat/messages?conversationId=${conversationId}`)
+                .then(r => r.json())
+                .then(list => {
+                    list.forEach(m => appendMessage(m.senderName ?? (m.sender?.firstName + ' ' + m.sender?.lastName), m.body, m.senderId));
+                })
+                .catch(err => console.error('Failed to load messages', err));
+        }).catch(err => {
+            console.error('SignalR connection failed', err);
+            const container = document.getElementById('messages');
+            container.innerHTML = '<div class="text-danger p-3">Unable to connect to chat server. Check console for details.</div>';
+        });
+    } else {
+        // Even if SignalR is not available, still attempt to load recent messages so UI shows content.
+        fetch(`/api/chat/messages?conversationId=${conversationId}`)
+            .then(r => r.json())
+            .then(list => {
+                list.forEach(m => appendMessage(m.senderName ?? (m.sender?.firstName + ' ' + m.sender?.lastName), m.body, m.senderId));
+            })
+            .catch(err => console.error('Failed to load messages', err));
+    }
+
+    if (connection) {
+        connection.onclose(err => {
+            console.warn('SignalR connection closed', err);
+        });
+    }
+
+    document.getElementById('sendBtn').addEventListener('click', async () => {
+        const input = document.getElementById('messageInput');
+        const text = input.value.trim();
+        if (!text) return;
+        if (connection) {
+            try {
+                await connection.invoke('SendMessageToConversation', conversationId, text);
+                input.value = '';
+            } catch (e) { console.error('Send failed', e); }
+        } else {
+            // Fallback: POST message to API so it is persisted and broadcast server-side
+            try {
+                const res = await fetch('/api/chat/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ conversationId: conversationId, body: text })
+                });
+                if (res.ok) {
+                    const payload = await res.json();
+                    appendMessage(payload.senderName ?? (payload.sender?.firstName + ' ' + payload.sender?.lastName), payload.body, payload.senderId);
+                    input.value = '';
+                } else {
+                    console.error('Fallback send failed', await res.text());
+                }
+            } catch (e) { console.error('Fallback send error', e); }
+        }
+    });
+</script>

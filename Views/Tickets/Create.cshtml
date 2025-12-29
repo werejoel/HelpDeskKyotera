@@ -1,0 +1,123 @@
+﻿@using HelpDeskKyotera.ViewModels.Tickets
+@model TicketCreateViewModel
+
+@{
+    ViewData["Title"] = "Create Ticket";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-plus-circle"></i> Create New Ticket
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post" novalidate class="needs-validation">
+                        <div asp-validation-summary="All" class="alert alert-danger d-none" role="alert" id="validationSummary"></div>
+
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
+                            <input asp-for="Title" type="text" class="form-control" placeholder="Brief description of the issue" required />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+                            <textarea asp-for="Description" class="form-control" rows="5" 
+                                      placeholder="Detailed description of the issue" required></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Two Column Row -->
+                        <div class="row">
+                            <!-- Category -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CategoryId" class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                                <select asp-for="CategoryId" class="form-select" required>
+                                    <option value="">-- Select Category --</option>
+                                    @if (ViewBag.Categories != null)
+                                    {
+                                        @foreach (var category in ViewBag.Categories)
+                                        {
+                                            <option value="@category.Value">@category.Text</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Priority -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="PriorityId" class="form-label fw-semibold">Priority <span class="text-danger">*</span></label>
+                                <select asp-for="PriorityId" class="form-select" required>
+                                    <option value="">-- Select Priority --</option>
+                                    @if (ViewBag.Priorities != null)
+                                    {
+                                        @foreach (var priority in ViewBag.Priorities)
+                                        {
+                                            <option value="@priority.Value">@priority.Text</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="PriorityId" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Due Date -->
+                        <div class="mb-3">
+                            <label asp-for="DueBy" class="form-label fw-semibold">Due Date</label>
+                            <input asp-for="DueBy" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="DueBy" class="text-danger small"></span>
+                            <small class="text-muted">Leave blank if no specific deadline</small>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Create Ticket
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="col-md-4">
+            <div class="card bg-light border-0">
+                <div class="card-header bg-light border-0">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Tips</h5>
+                </div>
+                <div class="card-body small">
+                    <ul class="mb-0 ps-3">
+                        <li class="mb-2">Be descriptive in your title</li>
+                        <li class="mb-2">Include all relevant details in the description</li>
+                        <li class="mb-2">Select appropriate category for faster resolution</li>
+                        <li class="mb-2">Choose priority based on impact to your work</li>
+                        <li>Attach files or screenshots if applicable</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Show validation summary if there are errors
+        const validationSummary = document.getElementById('validationSummary');
+        const errorElements = document.querySelectorAll('[data-valmsg-summary]');
+        if (errorElements.length > 0 && errorElements[0].textContent.trim()) {
+            validationSummary.classList.remove('d-none');
+        }
+    </script>
+}
