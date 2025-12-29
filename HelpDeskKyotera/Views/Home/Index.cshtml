@@ -2,6 +2,33 @@
 	ViewData["Title"] = "Welcome";
 }
 
+<style>
+	.hero-illustration {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 260px;
+		transition: transform 0.18s ease, height 0.18s ease;
+	}
+
+	.hero-illustration i {
+		font-size: 7rem;
+		color: #667eea;
+		opacity: 0.95;
+		transition: font-size 0.18s ease, transform 0.18s ease;
+	}
+
+	@@media (max-width: 768px) {
+		.hero-illustration { height: 200px; }
+		.hero-illustration i { font-size: 4.5rem; }
+	}
+
+	@@media (min-width: 1200px) {
+		.hero-illustration { height: 320px; }
+		.hero-illustration i { font-size: 8rem; }
+	}
+</style>
+
 <!-- Hero -->
 <section id="hero" class="py-5 bg-light">
 	<div class="container">
@@ -15,7 +42,10 @@
 				</div>
 			</div>
 			<div class="col-md-5 text-center mt-4 mt-md-0">
-				<img src="~/images/hero-illustration.svg" alt="HelpDesk illustration" class="img-fluid" style="max-height:260px;opacity:0.95;" />
+				<!-- Use Bootstrap icon as a fallback illustration when image is missing -->
+				<div class="hero-illustration">
+					<i class="bi bi-headset" aria-hidden="true"></i>
+				</div>
 			</div>
 		</div>
 	</div>
