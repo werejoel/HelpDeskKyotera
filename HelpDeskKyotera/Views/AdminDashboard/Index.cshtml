@@ -1181,6 +1181,22 @@
 
                 <div class="col-lg-4">
 
+                    <!-- Analytics Charts -->
+                    <div class="card border-0 shadow-sm rounded-4 mb-4">
+                        <div class="card-header bg-white border-0 py-3">
+                            <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-graph-up me-2 text-primary"></i>Analytics</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <canvas id="ticketsByStatusChart" height="200"></canvas>
+                            </div>
+                            <div>
+                                <canvas id="ticketsByMonthChart" height="160"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+
                     <!-- Departments -->
                     <div class="card border-0 shadow-sm rounded-4">
                         <div class="card-header bg-white border-0 py-3">
@@ -1333,4 +1349,57 @@
             updateSidebarState();
         });
     });
+</script>
+<!-- Chart.js CDN and rendering script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    (function(){
+        // Data from server
+        var statusLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TicketsByStatusLabels ?? new List<string>()));
+        var statusData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TicketsByStatusData ?? new List<int>()));
+
+        var monthLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TicketsByMonthLabels ?? new List<string>()));
+        var monthData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TicketsByMonthData ?? new List<int>()));
+
+        // Tickets by status - doughnut
+        var ctx1 = document.getElementById('ticketsByStatusChart');
+        if (ctx1) {
+            new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: statusLabels,
+                    datasets: [{
+                        data: statusData,
+                        backgroundColor: [ '#0d6efd', '#20c997', '#ffc107', '#dc3545', '#6c757d' ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    plugins: { legend: { position: 'bottom' } },
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Tickets by month - bar
+        var ctx2 = document.getElementById('ticketsByMonthChart');
+        if (ctx2) {
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: monthLabels,
+                    datasets: [{
+                        label: 'Tickets',
+                        data: monthData,
+                        backgroundColor: '#2563eb'
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } },
+                    maintainAspectRatio: false
+                }
+            });
+        }
+    })();
 </script>

@@ -64,6 +64,26 @@ namespace HelpDeskKyotera.Controllers
                 // Get departments
                 dashboardData.Departments = allDepartments?.ToList() ?? new List<Department>();
 
+                // Compute Tickets by Status
+                var tickets = pagedTickets?.Items ?? new List<TicketListItemViewModel>();
+                var byStatus = tickets.GroupBy(t => t.StatusName ?? "Unknown")
+                    .Select(g => new { Status = g.Key, Count = g.Count() })
+                    .OrderByDescending(x => x.Count)
+                    .ToList();
+
+                dashboardData.TicketsByStatusLabels = byStatus.Select(x => x.Status).ToList();
+                dashboardData.TicketsByStatusData = byStatus.Select(x => x.Count).ToList();
+
+                // Compute Tickets by Month (recent 6 months)
+                var byMonth = tickets
+                    .GroupBy(t => new { Year = t.CreatedOn.Year, Month = t.CreatedOn.Month })
+                    .Select(g => new { Period = new DateTime(g.Key.Year, g.Key.Month, 1), Count = g.Count() })
+                    .OrderBy(x => x.Period)
+                    .ToList();
+
+                dashboardData.TicketsByMonthLabels = byMonth.Select(x => x.Period.ToString("MMM yyyy")).ToList();
+                dashboardData.TicketsByMonthData = byMonth.Select(x => x.Count).ToList();
+
                 return View(dashboardData);
             }
             catch (Exception ex)
@@ -82,5 +102,11 @@ namespace HelpDeskKyotera.Controllers
         public int TotalUsers { get; set; }
         public List<Ticket> RecentTickets { get; set; } = new();
         public List<Department> Departments { get; set; } = new();
+        // Analytics data
+        public List<string> TicketsByStatusLabels { get; set; } = new();
+        public List<int> TicketsByStatusData { get; set; } = new();
+
+        public List<string> TicketsByMonthLabels { get; set; } = new();
+        public List<int> TicketsByMonthData { get; set; } = new();
     }
 }
