@@ -45,11 +45,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         builder.Entity<IdentityUserToken<Guid>>().ToTable("UserTokens");
         
         // RELATIONSHIPS 
-        // User → Department (optional)
+        // User → Department 
         builder.Entity<ApplicationUser>()
             .HasOne(u => u.Department)
             .WithMany(d => d.Users)
-            .HasForeignKey(u => u.DepartmentId)  // now Guid?
+            .HasForeignKey(u => u.DepartmentId)
             .OnDelete(DeleteBehavior.SetNull);
 
         // User → Location (optional)

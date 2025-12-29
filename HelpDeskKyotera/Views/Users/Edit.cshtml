@@ -3,138 +3,430 @@
     ViewData["Title"] = "Edit User";
 }
 
-<div class="container mt-1">
-    <!-- Page header -->
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 pb-2 border-bottom">
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row align-items-start align-md-items-center justify-content-between mb-4 gap-3">
         <div>
-            <h1 class="h4 fw-bold mb-1 text-primary">Edit User</h1>
-            <p class="text-muted small mb-0">Update the user’s profile and account settings.</p>
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb mb-0 small">
+                    <li class="breadcrumb-item"><a asp-action="Index">Users</a></li>
+                    <li class="breadcrumb-item active">Edit User</li>
+                </ol>
+            </nav>
+            <h1 class="h2 fw-bold mb-2">
+                <i class="bi bi-pencil-square text-primary me-2"></i>Edit User Profile
+            </h1>
+            <p class="text-muted mb-0">Update user information, status, and department assignment</p>
         </div>
         <div class="d-flex gap-2">
-            <a asp-action="Index" class="btn btn-info">
-                <i class="bi bi-arrow-left me-1"></i> Back to Users
+            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-arrow-left me-2"></i> Back to Users
             </a>
         </div>
     </div>
 
     <div class="row g-4">
-        <!-- Form Section -->
-        <div class="col-lg-7 col-xl-6">
-            <div class="card shadow border-0 rounded">
-                <div class="card-header bg-dark text-white">
-                    <i class="bi bi-person-gear me-2"></i> User Information
+        <!-- Main Form Section -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-badge text-primary"></i>
+                        <h5 class="mb-0 fw-bold">User Details</h5>
+                    </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <form asp-action="Edit" method="post" novalidate>
                         <input type="hidden" asp-for="Id" />
                         <input type="hidden" asp-for="ConcurrencyStamp" />
 
-                        <!-- Validation -->
+                        <!-- Validation Errors -->
                         @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Values.Any(v => v.Errors.Count > 0))
                         {
-                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                <div class="fw-semibold mb-1">We couldn’t save your changes.</div>
-                                <div class="small text-muted mb-2">Please review the messages below and try again.</div>
-                                <div asp-validation-summary="All"></div>
+                            <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                                <div class="d-flex gap-2">
+                                    <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1"></i>
+                                    <div>
+                                        <h5 class="alert-heading mb-2">Validation Failed</h5>
+                                        <p class="mb-2">Please review and correct the following issues:</p>
+                                        <ul class="mb-0 small">
+                                            @foreach (var modelState in ViewData.ModelState.Values)
+                                            {
+                                                @foreach (var error in modelState.Errors)
+                                                {
+                                                    <li>@error.ErrorMessage</li>
+                                                }
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         }
 
-                        <div class="row g-3">
-                            <!-- First & Last Name (same row) -->
-                            <div class="col-md-6">
-                                <label asp-for="FirstName" class="form-label"></label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                    <input asp-for="FirstName" class="form-control" autocomplete="given-name" />
+                        <!-- Personal Information Section -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-uppercase text-muted mb-3">
+                                <i class="bi bi-person-circle me-2"></i>Personal Information
+                            </h6>
+                            <div class="row g-3">
+                                <!-- First Name -->
+                                <div class="col-md-6">
+                                    <label asp-for="FirstName" class="form-label fw-semibold">
+                                        <i class="bi bi-person me-1"></i>First Name
+                                    </label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="bi bi-person-fill text-primary"></i>
+                                        </span>
+                                        <input asp-for="FirstName" 
+                                               class="form-control border-start-0" 
+                                               placeholder="John"
+                                               autocomplete="given-name" />
+                                    </div>
+                                    <small class="text-muted d-block mt-1">Required field</small>
+                                    <span asp-validation-for="FirstName" class="text-danger small d-block mt-1"></span>
                                 </div>
-                                <span asp-validation-for="FirstName" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="LastName" class="form-label"></label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                    <input asp-for="LastName" class="form-control" autocomplete="family-name" />
-                                </div>
-                                <span asp-validation-for="LastName" class="text-danger"></span>
-                            </div>
 
-                            <!-- Email (full width single row) -->
-                            <div class="col-12">
-                                <label asp-for="Email" class="form-label"></label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                                    <input asp-for="Email" class="form-control" type="email" autocomplete="email" />
+                                <!-- Last Name -->
+                                <div class="col-md-6">
+                                    <label asp-for="LastName" class="form-label fw-semibold">
+                                        <i class="bi bi-person me-1"></i>Last Name
+                                    </label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="bi bi-person-fill text-primary"></i>
+                                        </span>
+                                        <input asp-for="LastName" 
+                                               class="form-control border-start-0" 
+                                               placeholder="Doe"
+                                               autocomplete="family-name" />
+                                    </div>
+                                    <small class="text-muted d-block mt-1">Optional field</small>
+                                    <span asp-validation-for="LastName" class="text-danger small d-block mt-1"></span>
                                 </div>
-                                <span asp-validation-for="Email" class="text-danger"></span>
-                            </div>
 
-                           
-                            <div class="col-md-6">
-                                <label asp-for="PhoneNumber" class="form-label"></label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                                    <input asp-for="PhoneNumber" class="form-control" type="tel" autocomplete="tel" />
+                                <!-- Email -->
+                                <div class="col-12">
+                                    <label asp-for="Email" class="form-label fw-semibold">
+                                        <i class="bi bi-envelope me-1"></i>Email Address
+                                    </label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="bi bi-envelope-fill text-primary"></i>
+                                        </span>
+                                        <input asp-for="Email" 
+                                               class="form-control border-start-0" 
+                                               type="email" 
+                                               placeholder="john.doe@example.com"
+                                               autocomplete="email" />
+                                    </div>
+                                    <small class="text-muted d-block mt-1">Must be unique and valid</small>
+                                    <span asp-validation-for="Email" class="text-danger small d-block mt-1"></span>
                                 </div>
-                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                            </div>
 
-                            <!-- IsActive & EmailConfirmed (same row) -->
-                            <div class="col-md-6 d-flex align-items-center gap-4">
-                                <div class="form-check form-switch">
-                                    <input asp-for="IsActive" class="form-check-input" />
-                                    <label asp-for="IsActive" class="form-check-label"></label>
+                                <!-- Phone Number -->
+                                <div class="col-12">
+                                    <label asp-for="PhoneNumber" class="form-label fw-semibold">
+                                        <i class="bi bi-telephone me-1"></i>Phone Number
+                                    </label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="bi bi-telephone-fill text-primary"></i>
+                                        </span>
+                                        <input asp-for="PhoneNumber" 
+                                               class="form-control border-start-0" 
+                                               type="tel" 
+                                               placeholder="+1 (555) 000-0000"
+                                               autocomplete="tel" />
+                                    </div>
+                                    <small class="text-muted d-block mt-1">Optional - Include country code if international</small>
+                                    <span asp-validation-for="PhoneNumber" class="text-danger small d-block mt-1"></span>
                                 </div>
-                                <div class="form-check form-switch">
-                                    <input asp-for="EmailConfirmed" class="form-check-input" />
-                                    <label asp-for="EmailConfirmed" class="form-check-label"></label>
-                                </div>
-                            </div>
-
-                            <div class="col-12 mt-2">
-                                <label asp-for="DepartmentId" class="form-label"></label>
-                                <select asp-for="DepartmentId" class="form-select" asp-items="Model.Departments">
-                                    <option value="">-- No Department --</option>
-                                </select>
-                                <span asp-validation-for="DepartmentId" class="text-danger"></span>
                             </div>
                         </div>
 
-                        <!-- Actions -->
-                        <div class="d-flex justify-content-end gap-2 mt-4">
-                            <button class="btn btn-primary">
-                                <i class="bi bi-save me-1"></i> Save Changes
-                            </button>
-                            <a asp-action="Index" class="btn btn-info">
-                                <i class="bi bi-x-circle me-1"></i> Cancel
+                        <!-- Account Status Section -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-uppercase text-muted mb-3">
+                                <i class="bi bi-shield-check me-2"></i>Account Status
+                            </h6>
+
+                            <div class="row g-3">
+                                <!-- IsActive -->
+                                <div class="col-md-6">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body">
+                                            <div class="form-check form-switch">
+                                                <input asp-for="IsActive" 
+                                                       class="form-check-input form-check-input-lg" 
+                                                       id="isActiveSwitch" />
+                                                <label class="form-check-label fw-semibold" for="isActiveSwitch">
+                                                    <i class="bi bi-check-circle me-2"></i>Account Active
+                                                </label>
+                                            </div>
+                                            <small class="text-muted d-block mt-2">
+                                                Inactive users cannot log in or access the system
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- EmailConfirmed -->
+                                <div class="col-md-6">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body">
+                                            <div class="form-check form-switch">
+                                                <input asp-for="EmailConfirmed" 
+                                                       class="form-check-input form-check-input-lg" 
+                                                       id="emailConfirmedSwitch" />
+                                                <label class="form-check-label fw-semibold" for="emailConfirmedSwitch">
+                                                    <i class="bi bi-shield-check me-2"></i>Email Confirmed
+                                                </label>
+                                            </div>
+                                            <small class="text-muted d-block mt-2">
+                                                Required for password reset and critical notifications
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Organization Section -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-uppercase text-muted mb-3">
+                                <i class="bi bi-building me-2"></i>Organization
+                            </h6>
+
+                            <div class="row g-3">
+                                <!-- Department -->
+                                <div class="col-12">
+                                    <label asp-for="DepartmentId" class="form-label fw-semibold">
+                                        <i class="bi bi-diagram-2 me-1"></i>Department Assignment
+                                    </label>
+                                    <select asp-for="DepartmentId" 
+                                            class="form-select form-select-lg" 
+                                            asp-items="Model.Departments">
+                                        <option value="">-- No Department Assigned --</option>
+                                    </select>
+                                    <small class="text-muted d-block mt-1">Assign the user to a specific department</small>
+                                    <span asp-validation-for="DepartmentId" class="text-danger small d-block mt-1"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between gap-2 mt-4 pt-3 border-top">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle me-2"></i> Cancel
                             </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-save me-2"></i> Save Changes
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
 
-        <!-- Guidelines Section -->
-        <div class="col-lg-5 col-xl-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-dark text-white">
-                    <i class="bi bi-lightbulb me-2"></i> Guidelines
+        <!-- Sidebar: Guidelines & Info -->
+        <div class="col-lg-4">
+            <!-- Info Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light border-bottom">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-info-circle text-info"></i>
+                        <h5 class="mb-0 fw-bold">Quick Info</h5>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <ul class="list-unstyled small mb-0">
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i> First and last names should be properly capitalized.</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i> Email must be unique and valid.</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i> Phone number should include country code if international.</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i> Inactive users will not be able to log in.</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i> Confirmed email is required for password reset and notifications.</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i> Use Manage Roles to adjust user permissions.</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i> Use Reset Password flow or send a password reset email to manage password.</li>
-                    </ul>
+                    <div class="alert alert-info alert-dismissible fade show mb-0" role="alert">
+                        <i class="bi bi-lightbulb-fill me-2"></i>
+                        <strong>Pro Tip:</strong> Use the toggles below to manage user permissions and account status.
+                        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guidelines Card -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-bookmark-check text-warning"></i>
+                        <h5 class="mb-0 fw-bold">Guidelines</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="fw-semibold small text-uppercase text-muted mb-2">
+                            <i class="bi bi-person me-1"></i>Personal Info
+                        </h6>
+                        <ul class="list-unstyled small mb-3">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                <span>Names should be properly capitalized</span>
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                <span>Email must be valid and unique</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                <span>Include country code for international phones</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="fw-semibold small text-uppercase text-muted mb-2">
+                            <i class="bi bi-toggle-on me-1"></i>Account Controls
+                        </h6>
+                        <ul class="list-unstyled small mb-3">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                <span><strong>Active:</strong> User can log in</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                <span><strong>Email Confirmed:</strong> Required for resets</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h6 class="fw-semibold small text-uppercase text-muted mb-2">
+                            <i class="bi bi-tools me-1"></i>Additional Actions
+                        </h6>
+                        <ul class="list-unstyled small">
+                            <li class="mb-2">
+                                <i class="bi bi-key-fill text-warning me-1"></i>
+                                <span>Use Manage Roles for permissions</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-shield-fill text-info me-1"></i>
+                                <span>Use Manage Claims for claims</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Edit Form Enhancements */
+    .input-group-lg .input-group-text {
+        padding: 0.75rem 1rem;
+        background-color: #f8f9fa;
+    }
+
+    .input-group-lg .form-control {
+        font-size: 1rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .input-group-text {
+        border: 1px solid #dee2e6;
+    }
+
+    .input-group .form-control:focus,
+    .input-group .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .form-check-input-lg {
+        width: 1.5em;
+        height: 1.5em;
+        margin-top: 0.25em;
+        cursor: pointer;
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .form-select-lg {
+        font-size: 1rem;
+        padding: 0.75rem 2.25rem 0.75rem 1rem;
+        min-height: auto;
+    }
+
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+
+    /* Section Dividers */
+    h6[class*="text-uppercase"] {
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 0.5rem;
+    }
+
+    /* Alert Enhancements */
+    .alert {
+        border: none;
+    }
+
+    .alert-info {
+        background-color: #e7f3ff;
+        color: #0056b3;
+    }
+
+    /* Card Hover Effects */
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Button Enhancements */
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #5568d3 0%, #6a3d8a 100%);
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+        background-color: transparent;
+        padding: 0;
+    }
+
+    .breadcrumb-item.active {
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    /* Validation Feedback */
+    .text-danger {
+        font-weight: 500;
+    }
+
+    /* Input Focus State */
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    }
+</style>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

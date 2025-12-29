@@ -15,99 +15,193 @@
     bool canViewDetails = isStaff;                 // Details = Admin OR Ceo
     bool canManageClaims = isAdmin;                // ManageClaims = Admin
     bool showActionsCol = canViewDetails || canEditUser || canManageRoles || canDeleteUser;
+    
+    // Count active/inactive users for stats
+    int activeCount = Model.Items.Count(u => u.IsActive);
+    int inactiveCount = Model.Items.Count(u => !u.IsActive);
 }
 
-<div class="container mt-1">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4 pb-2 border-bottom">
+<div class="container-fluid mt-4">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row align-items-start align-md-items-center justify-content-between mb-4 gap-3">
         <div>
-            <h1 class="h3 mb-1 fw-bold text-primary">Users Administration</h1>
-            <p class="text-muted mb-0">Search, filter, and manage application users.</p>
+            <h1 class="h2 fw-bold mb-2">
+                <i class="bi bi-people-fill text-primary me-2"></i>Users Management
+            </h1>
+            <p class="text-muted mb-0">Manage and configure user accounts, roles, and permissions</p>
         </div>
 
         @* Create (Admin only) *@
         @if (canCreateUser)
         {
             <div>
-                <a asp-action="Create" class="btn btn-primary">
-                    <i class="bi bi-plus-lg me-1"></i> Add New User
+                <a asp-action="Create" class="btn btn-primary btn-lg shadow-sm">
+                    <i class="bi bi-person-plus me-2"></i> Add New User
                 </a>
             </div>
         }
     </div>
 
+    <!-- Alerts -->
     @if (TempData["Success"] is string sMsg)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle me-2"></i>@sMsg
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <div class="d-flex gap-2">
+                <i class="bi bi-check-circle-fill flex-shrink-0 mt-1"></i>
+                <div>
+                    <strong>Success!</strong> @sMsg
+                </div>
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
     @if (TempData["Error"] is string eMsg)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle me-2"></i>@eMsg
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <div class="d-flex gap-2">
+                <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1"></i>
+                <div>
+                    <strong>Error!</strong> @eMsg
+                </div>
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-    <!-- Filter Bar -->
-    <form method="get" class="row g-2 align-items-end mb-3">
-        <div class="col-md-4">
-            <label class="form-label">Search</label>
-            <input name="Search" value="@filter.Search" class="form-control"
-                   placeholder="Search name, email, phone, username" />
+    <!-- Quick Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small fw-semibold">Total Users</p>
+                            <h3 class="mb-0 fw-bold">@Model.TotalCount</h3>
+                        </div>
+                        <i class="bi bi-people-fill text-primary" style="font-size: 2.5rem; opacity: 0.2;"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-md-2">
-            <label class="form-label">Status</label>
-            <select name="IsActive" class="form-select">
-                <option value="">All Status</option>
-                <option value="true" selected="@(filter.IsActive == true)">Active</option>
-                <option value="false" selected="@(filter.IsActive == false)">Inactive</option>
-            </select>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small fw-semibold">Active Users</p>
+                            <h3 class="mb-0 fw-bold text-success">@activeCount</h3>
+                        </div>
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 2.5rem; opacity: 0.2;"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-md-2">
-            <label class="form-label">Email</label>
-            <select name="EmailConfirmed" class="form-select">
-                <option value="">All Emails</option>
-                <option value="true" selected="@(filter.EmailConfirmed == true)">Confirmed</option>
-                <option value="false" selected="@(filter.EmailConfirmed == false)">Unconfirmed</option>
-            </select>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small fw-semibold">Inactive Users</p>
+                            <h3 class="mb-0 fw-bold text-danger">@inactiveCount</h3>
+                        </div>
+                        <i class="bi bi-x-circle-fill text-danger" style="font-size: 2.5rem; opacity: 0.2;"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-md-2">
-            <label class="form-label">Page Size</label>
-            <select name="PageSize" class="form-select">
-                @foreach (var size in new[] { 5, 10, 20, 50 })
-                {
-                    <option value="@size" selected="@(filter.PageSize == size)">@size / page</option>
-                }
-            </select>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small fw-semibold">Page</p>
+                            <h3 class="mb-0 fw-bold">@Model.PageNumber / @Math.Ceiling((double)Model.TotalCount / Model.PageSize)</h3>
+                        </div>
+                        <i class="bi bi-file-earmark-text text-info" style="font-size: 2.5rem; opacity: 0.2;"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-md-2 d-grid d-sm-flex gap-2">
-            <button class="btn btn-primary" type="submit">
-                <i class="bi bi-funnel me-1"></i> Apply
-            </button>
-            <!-- Clear = go to Index without query string -->
-            <a asp-action="Index" class="btn btn-info">
-                <i class="bi bi-x-circle me-1"></i> Clear
-            </a>
-        </div>
-    </form>
+    </div>
 
-    <div class="card shadow border-0 rounded">
+    <!-- Filter Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-light border-bottom">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-funnel text-primary"></i>
+                <h5 class="mb-0">Advanced Filters</h5>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-lg-5">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-search me-1"></i>Search Users
+                    </label>
+                    <input name="Search" value="@filter.Search" class="form-control form-control-lg"
+                           placeholder="Name, email, phone, or username..." />
+                </div>
+                <div class="col-lg-2">
+                    <label class="form-label fw-semibold">Account Status</label>
+                    <select name="IsActive" class="form-select form-select-lg">
+                        <option value="">All Statuses</option>
+                        <option value="true" selected="@(filter.IsActive == true)">Active</option>
+                        <option value="false" selected="@(filter.IsActive == false)">Inactive</option>
+                    </select>
+                </div>
+                <div class="col-lg-2">
+                    <label class="form-label fw-semibold">Email Status</label>
+                    <select name="EmailConfirmed" class="form-select form-select-lg">
+                        <option value="">All States</option>
+                        <option value="true" selected="@(filter.EmailConfirmed == true)">Confirmed</option>
+                        <option value="false" selected="@(filter.EmailConfirmed == false)">Unconfirmed</option>
+                    </select>
+                </div>
+                <div class="col-lg-2">
+                    <label class="form-label fw-semibold">Items per Page</label>
+                    <select name="PageSize" class="form-select form-select-lg">
+                        @foreach (var size in new[] { 5, 10, 20, 50 })
+                        {
+                            <option value="@size" selected="@(filter.PageSize == size)">@size items</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-lg-12 d-flex gap-2 pt-2">
+                    <button class="btn btn-primary btn-lg" type="submit">
+                        <i class="bi bi-search me-2"></i> Apply Filters
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-arrow-clockwise me-2"></i> Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-light border-bottom">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-list-ul me-2"></i>Users List
+                </h5>
+                <span class="badge bg-primary rounded-pill">@Model.Items.Count() users</span>
+            </div>
+        </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Status</th>
-                            <th>Email Status</th>
-                            <th>Created</th>
+                    <thead class="table-light">
+                        <tr class="border-bottom">
+                            <th class="fw-semibold">User</th>
+                            <th class="fw-semibold">Email</th>
+                            <th class="fw-semibold">Phone</th>
+                            <th class="fw-semibold">Account</th>
+                            <th class="fw-semibold">Email</th>
+                            <th class="fw-semibold">Joined</th>
                             @if (showActionsCol)
                             {
-                                <th class="text-end">Actions</th>
+                                <th class="fw-semibold text-end">Actions</th>
                             }
                         </tr>
                     </thead>
@@ -115,85 +209,123 @@
                         @if (!Model.Items.Any())
                         {
                             <tr>
-                                <td colspan="@(showActionsCol ? 7 : 6)" class="text-center text-muted py-4">No users found.</td>
+                                <td colspan="@(showActionsCol ? 7 : 6)" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="bi bi-inbox" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                                        <p class="mt-2 mb-0">No users found matching your criteria.</p>
+                                        <small class="text-muted">Try adjusting your filters</small>
+                                    </div>
+                                </td>
                             </tr>
                         }
                         else
                         {
                             foreach (var u in Model.Items)
                             {
-                                <tr>
-                                    <td>@($"{u.FirstName} {u.LastName}".Trim())</td>
-                                    <td>@u.Email</td>
-                                    <td>@u.PhoneNumber</td>
-
+                                var fullName = $"{u.FirstName} {u.LastName}".Trim();
+                                var initials = string.Concat(u.FirstName?.FirstOrDefault(), u.LastName?.FirstOrDefault());
+                                <tr class="border-bottom hover" style="cursor: default;">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px; border-radius: 50%;">
+                                                @initials
+                                            </div>
+                                            <div>
+                                                <p class="mb-0 fw-semibold">@fullName</p>
+                                                <small class="text-muted">@u.UserName</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a href="mailto:@u.Email" class="text-decoration-none">@u.Email</a>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(u.PhoneNumber))
+                                        {
+                                            <a href="tel:@u.PhoneNumber" class="text-decoration-none">@u.PhoneNumber</a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
                                     <td>
                                         @if (u.IsActive)
                                         {
-                                            <span class="badge rounded-pill bg-success">Active</span>
+                                            <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle">
+                                                <i class="bi bi-check-circle me-1"></i> Active
+                                            </span>
                                         }
                                         else
                                         {
-                                            <span class="badge rounded-pill bg-danger">Inactive</span>
+                                            <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle">
+                                                <i class="bi bi-x-circle me-1"></i> Inactive
+                                            </span>
                                         }
                                     </td>
-
                                     <td>
                                         @if (u.EmailConfirmed)
                                         {
-                                            <span class="badge rounded-pill bg-success">Confirmed</span>
+                                            <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle">
+                                                <i class="bi bi-shield-check me-1"></i> Confirmed
+                                            </span>
                                         }
                                         else
                                         {
-                                            <span class="badge rounded-pill bg-warning text-dark">Unconfirmed</span>
+                                            <span class="badge rounded-pill bg-warning-subtle text-warning border border-warning-subtle">
+                                                <i class="bi bi-exclamation-circle me-1"></i> Pending
+                                            </span>
                                         }
                                     </td>
-
-                                    <td>@u.CreatedOn?.ToString("yyyy-MM-dd")</td>
-
+                                    <td>
+                                        <small class="text-muted" title="@u.CreatedOn?.ToString("yyyy-MM-dd HH:mm:ss")">
+                                            @u.CreatedOn?.ToString("MMM dd, yyyy")
+                                        </small>
+                                    </td>
                                     @if (showActionsCol)
                                     {
                                         <td class="text-end">
-                                            @* Details: Admin OR  Ceo *@
-                                            @if (canViewDetails)
-                                            {
-                                                <a asp-action="Details" asp-route-id="@u.Id" class="btn btn-sm btn-outline-info me-1">
-                                                    <i class="bi bi-card-list me-1"></i> Details
-                                                </a>
-                                            }
+                                            <div class="btn-group" role="group">
+                                                @* Details: Admin OR Ceo *@
+                                                @if (canViewDetails)
+                                                {
+                                                    <a asp-action="Details" asp-route-id="@u.Id" class="btn btn-sm btn-outline-info" title="View details">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                }
 
-                                            @* Edit: Admin AND Ceo  *@
-                                            @if (canEditUser)
-                                            {
-                                                <a asp-action="Edit" asp-route-id="@u.Id" class="btn btn-sm btn-outline-primary me-1">
-                                                    <i class="bi bi-pencil-square me-1"></i> Edit
-                                                </a>
-                                            }
+                                                @* Edit: Admin AND Ceo *@
+                                                @if (canEditUser)
+                                                {
+                                                    <a asp-action="Edit" asp-route-id="@u.Id" class="btn btn-sm btn-outline-primary" title="Edit user">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                }
 
-                                            @* Manage Claim: Admin only *@
-                                            @if (canManageClaims)
-                                            {
-                                                <a asp-action="ManageClaims" asp-route-id="@u.Id" class="btn btn-sm btn-outline-success">
-                                                    <i class="bi bi-key me-1"></i> Claims
-                                                </a>
+                                                @* Manage Roles: Admin OR Ceo *@
+                                                @if (canManageRoles)
+                                                {
+                                                    <a asp-action="ManageRoles" asp-route-id="@u.Id" class="btn btn-sm btn-outline-warning" title="Manage roles">
+                                                        <i class="bi bi-shield"></i>
+                                                    </a>
+                                                }
 
-                                            }
+                                                @* Manage Claims: Admin only *@
+                                                @if (canManageClaims)
+                                                {
+                                                    <a asp-action="ManageClaims" asp-route-id="@u.Id" class="btn btn-sm btn-outline-success" title="Manage claims">
+                                                        <i class="bi bi-key"></i>
+                                                    </a>
+                                                }
 
-                                            @* Manage Roles: Admin OR  Ceo  *@
-                                            @if (canManageRoles)
-                                            {
-                                                <a asp-action="ManageRoles" asp-route-id="@u.Id" class="btn btn-sm btn-outline-dark me-1">
-                                                    <i class="bi bi-shield-check me-1"></i> Roles
-                                                </a>
-                                            }
-
-                                            @* Delete: Admin only *@
-                                            @if (canDeleteUser)
-                                            {
-                                                <a asp-action="Delete" asp-route-id="@u.Id" class="btn btn-sm btn-outline-danger">
-                                                    <i class="bi bi-trash me-1"></i> Delete
-                                                </a>
-                                            }
+                                                @* Delete: Admin only *@
+                                                @if (canDeleteUser)
+                                                {
+                                                    <a asp-action="Delete" asp-route-id="@u.Id" class="btn btn-sm btn-outline-danger" title="Delete user">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                }
+                                            </div>
                                         </td>
                                     }
                                 </tr>
@@ -208,3 +340,89 @@
     <partial name="~/Views/Shared/_Pager.cshtml"
              model="new PagedResult<object> { Items = Array.Empty<object>(), TotalCount = Model.TotalCount, PageNumber = Model.PageNumber, PageSize = Model.PageSize }" />
 </div>
+
+<style>
+    /*styling for Users Index */
+    .avatar-circle {
+        min-width: 40px;
+        min-height: 40px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        font-size: 0.875rem;
+        letter-spacing: -0.5px;
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+        transition: background-color 0.15s ease;
+    }
+
+    .btn-group .btn {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .btn-group .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .badge {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control-lg, .form-select-lg {
+        border-radius: 0.5rem;
+        border: 1px solid #dee2e6;
+    }
+
+    .form-control-lg:focus, .form-select-lg:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .table thead th {
+        border-bottom: 2px solid #dee2e6;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    a[href^="mailto:"],
+    a[href^="tel:"] {
+        color: #0d6efd;
+        text-decoration: none;
+    }
+
+    a[href^="mailto:"]:hover,
+    a[href^="tel:"]:hover {
+        color: #0a58ca;
+        text-decoration: underline;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #5568d3 0%, #6a3d8a 100%);
+    }
+
+    .badge-success-subtle {
+        background-color: rgba(25, 135, 84, 0.15) !important;
+    }
+
+    .badge-danger-subtle {
+        background-color: rgba(220, 53, 69, 0.15) !important;
+    }
+
+    .badge-warning-subtle {
+        background-color: rgba(255, 193, 7, 0.15) !important;
+    }
+</style>
