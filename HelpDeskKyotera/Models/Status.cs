@@ -11,6 +11,7 @@ namespace HelpDeskKyotera.Models
         public bool IsFinal { get; set; }
         public int Order { get; set; }
 
+        //Navigation Property
         public virtual ICollection<Ticket> Tickets { get; set; }
     }
 }

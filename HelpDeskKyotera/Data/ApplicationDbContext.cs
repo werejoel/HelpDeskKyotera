@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using HelpDeskKyotera.Models;
 namespace HelpDeskKyotera.Data;
-
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -27,9 +26,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<ChatParticipant> ChatParticipants { get; set; }
     public DbSet<Address> Addresses { get; set; }
     public DbSet<ClaimMaster> ClaimMasters { get; set; }
-    //public DbSet<Article> Articles { get; set; }
-    //public DbSet<CannedResponse> CannedResponses { get; set; }
-
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -72,7 +68,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         builder.Entity<ApplicationUser>()
             .HasOne(u => u.Location)
             .WithMany(l => l.Users)
-            .HasForeignKey(u => u.LocationId)    // now Guid?
+            .HasForeignKey(u => u.LocationId)  
             .OnDelete(DeleteBehavior.SetNull);
 
         // Department → Location

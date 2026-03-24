@@ -1151,7 +1151,7 @@
                                                     <td>
                                                         @if (ticket.Status != null)
                                                         {
-                                                            <span class="badge rounded-pill px-3 py-2 bg-@(ticket.Status.Name == "Open" ? "success" : ticket.Status.Name == "Closed" ? "secondary" : "warning")">
+                                                            <span class="badge rounded-pill px-3 py-2 bg-@(ticket.Status.Name == "Open" ? "success" : ticket.Status.Name == "Closed" ? "danger" : "warning")">
                                                                 @ticket.Status.Name
                                                             </span>
                                                         }
@@ -1254,7 +1254,7 @@
         background: linear-gradient(135deg, #0dcaf0 0%, #0db8d8 100%);
     }
 
-    /* Sidebar Improvements */
+    /* Sidebar*/
     .nav-link {
         padding: 0.75rem 1rem !important;
         transition: all 0.3s ease;
@@ -1273,7 +1273,7 @@
         font-weight: 600;
     }
 
-    /* Card & Button Enhancements */
+    /* Card & Button*/
     .card {
         transition: all 0.3s ease;
         border-radius: 1rem !important;
@@ -1374,7 +1374,7 @@
                     labels: statusLabels,
                     datasets: [{
                         data: statusData,
-                        backgroundColor: [ '#0d6efd', '#20c997', '#ffc107', '#dc3545', '#6c757d' ],
+                        backgroundColor: [ ' #20c997', '#0d6efd', '#ffc107', '#dc3545', '#6c757d' ],
                         borderWidth: 0
                     }]
                 },

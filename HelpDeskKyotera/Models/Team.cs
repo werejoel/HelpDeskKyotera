@@ -12,6 +12,7 @@ namespace HelpDeskKyotera.Models
         public string? Specialization { get; set; }
         public Guid? TeamLeadId { get; set; }
 
+    //Navigation Properties
         public virtual ApplicationUser? TeamLead { get; set; }
         public virtual ICollection<Ticket> Tickets { get; set; }
     }

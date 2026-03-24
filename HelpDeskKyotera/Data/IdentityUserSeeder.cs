@@ -4,7 +4,7 @@ namespace HelpDeskKyotera.Models.Data
 {
     public static class IdentityUserSeeder
     {
-        // Adjust this to your policy
+        // To be Adjusted the policy
         private const string DefaultPassword = "Test@1234";
         // Predefined dummy users for each role
         private static readonly Dictionary<string, List<(string FirstName, string LastName, string Phone)>> RoleUsers =
@@ -30,6 +30,7 @@ namespace HelpDeskKyotera.Models.Data
                
         }
         };
+
         public static async Task SeedUsersAsync(IServiceProvider services)
         {
             using var scope = services.CreateScope();
@@ -43,6 +44,7 @@ namespace HelpDeskKyotera.Models.Data
                 }
             }
         }
+
         private static async Task EnsureUserInRoleAsync(
         UserManager<ApplicationUser> userManager,
         string firstName,

@@ -20,6 +20,7 @@ namespace HelpDeskKyotera.Controllers
             _userService = userService;
             _logger = logger;
         }
+        
         // Any authenticated user (no specific role required)
         // [Authorize] // (redundant; covered by class-level)
         [HttpGet]

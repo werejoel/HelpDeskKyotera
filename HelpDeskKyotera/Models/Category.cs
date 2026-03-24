@@ -12,6 +12,7 @@ namespace HelpDeskKyotera.Models
         public Guid? ParentId { get; set; }
         public Guid? DefaultTeamId { get; set; }
 
+        //Navigation Properties
         public virtual Category? Parent { get; set; }
         public virtual ICollection<Category> Children { get; set; } = new List<Category>();
         public virtual Team? DefaultTeam { get; set; }
