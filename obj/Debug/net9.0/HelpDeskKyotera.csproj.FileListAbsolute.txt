@@ -83,7 +83,6 @@ C:\Users\programming\source\repos\HelpDeskKyotera\HelpDeskKyotera\bin\Debug\net9
 C:\Users\programming\source\repos\HelpDeskKyotera\HelpDeskKyotera\bin\Debug\net9.0\System.Composition.Runtime.dll
 C:\Users\programming\source\repos\HelpDeskKyotera\HelpDeskKyotera\bin\Debug\net9.0\System.Composition.TypedParts.dll
 C:\Users\programming\source\repos\HelpDeskKyotera\HelpDeskKyotera\bin\Debug\net9.0\System.Configuration.ConfigurationManager.dll
-C:\Users\programming\source\repos\HelpDeskKyotera\HelpDeskKyotera\bin\Debug\net9.0\System.Formats.Asn1.dll
 C:\Users\programming\source\repos\HelpDeskKyotera\HelpDeskKyotera\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll
 C:\Users\programming\source\repos\HelpDeskKyotera\HelpDeskKyotera\bin\Debug\net9.0\System.Memory.Data.dll
 C:\Users\programming\source\repos\HelpDeskKyotera\HelpDeskKyotera\bin\Debug\net9.0\System.Reflection.MetadataLoadContext.dll
@@ -244,7 +243,6 @@ C:\Users\programming\source\repos\HelpDeskKyotera\HelpDeskKyotera\obj\Debug\net9
 C:\Users\programming\source\repos\HelpDeskKyotera\HelpDeskKyotera\obj\Debug\net9.0\HelpDeskKyotera.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\programming\source\repos\HelpDeskKyotera\HelpDeskKyotera\obj\Debug\net9.0\HelpDeskKyotera.RazorAssemblyInfo.cache
 C:\Users\programming\source\repos\HelpDeskKyotera\HelpDeskKyotera\obj\Debug\net9.0\HelpDeskKyotera.RazorAssemblyInfo.cs
-C:\Users\programming\source\repos\HelpDeskKyotera\HelpDeskKyotera\obj\Debug\net9.0\HelpDeskKyotera.sourcelink.json
 C:\Users\programming\source\repos\HelpDeskKyotera\HelpDeskKyotera\obj\Debug\net9.0\rjimswa.dswa.cache.json
 C:\Users\programming\source\repos\HelpDeskKyotera\HelpDeskKyotera\obj\Debug\net9.0\rjsmrazor.dswa.cache.json
 C:\Users\programming\source\repos\HelpDeskKyotera\HelpDeskKyotera\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json

@@ -14,7 +14,7 @@ namespace HelpDeskKyotera.Models
         public Guid? HeadOfDepartmentId { get; set; }
         public Guid? LocationId { get; set; }
 
-        // Navigation
+        // Navigation Properties
         public virtual ApplicationUser? Head { get; set; }
         public virtual Location? Location { get; set; }
         public virtual ICollection<ApplicationUser> Users { get; set; }

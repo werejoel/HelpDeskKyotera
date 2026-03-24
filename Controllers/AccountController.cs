@@ -35,6 +35,7 @@ namespace HelpDeskKyotera.Controllers
         }
 
 
+        //Registration Logic
         // GET: /Account/Register
         [HttpGet]
         public async Task<IActionResult> Register()
@@ -171,6 +172,8 @@ namespace HelpDeskKyotera.Controllers
             }
         }
 
+
+         //Login Logic
         // GET: /Account/Login
         [HttpGet]
         public IActionResult Login()
@@ -192,8 +195,7 @@ namespace HelpDeskKyotera.Controllers
 
                 if (result.Succeeded)
                 {
-                    // After successful sign-in, check the user's roles and redirect Admins to the Admin Dashboard.
-                    // Add diagnostic logging to help figure out why redirect may not occur.
+                    // After successful sign-in, check the user's roles and redirect
                     using var scope = HttpContext.RequestServices.CreateScope();
                     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
                     var signedInUser = await userManager.FindByEmailAsync(model.Email);
@@ -354,7 +356,7 @@ namespace HelpDeskKyotera.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during logout");
-                // Optionally redirect to error page or home with message
+                // Optionally redirect to error page
                 return RedirectToAction("Index", "Home");
             }
         }

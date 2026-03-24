@@ -45,8 +45,6 @@ namespace HelpDeskKyotera
                 options.TokenLifespan = TimeSpan.FromMinutes(30);
             });
 
-
-
             // Configure the Application Cookie settings
             builder.Services.ConfigureApplicationCookie(options =>
             {
@@ -69,15 +67,15 @@ namespace HelpDeskKyotera
                     options.SaveTokens = true;
                 });
 
-
-
-
             // Registering Custom Services
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<IChatService, ChatService>();
             builder.Services.AddSignalR();
+            builder.Services.AddHttpClient();
+            builder.Services.AddScoped<ILocationService, LocationService>();
+            builder.Services.AddSingleton<ISmsSender, TwilioSmsSender>();
             builder.Services.AddScoped<IRoleService, RoleService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IClaimsService, ClaimsService>();
@@ -122,6 +120,7 @@ namespace HelpDeskKyotera
 
             // Map SignalR hubs
             app.MapHub<HelpDeskKyotera.Hubs.ChatHub>("/chathub");
+            app.MapHub<HelpDeskKyotera.Hubs.LocationHub>("/locationhub");
 
             app.MapControllerRoute(
                 name: "default",

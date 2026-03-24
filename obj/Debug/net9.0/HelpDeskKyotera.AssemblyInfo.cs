@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HelpDeskKyotera")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9225f8d390d0414e30b23f13661d54aa30361893")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2d04be5935f0e3a980e47bc7554dcb25d3356275")]
 [assembly: System.Reflection.AssemblyProductAttribute("HelpDeskKyotera")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HelpDeskKyotera")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

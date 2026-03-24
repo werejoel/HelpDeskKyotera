@@ -15,6 +15,7 @@ namespace HelpDeskKyotera.Models
         public string? City { get; set; } = "Kyotera";
         public string? Country { get; set; } = "Uganda";
 
+        //Navigation Properties
         public virtual ICollection<Department> Departments { get; set; }
         public virtual ICollection<ApplicationUser> Users { get; set; }
     }

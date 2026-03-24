@@ -102,10 +102,10 @@ namespace HelpDeskKyotera.Controllers
         public int TotalUsers { get; set; }
         public List<Ticket> RecentTickets { get; set; } = new();
         public List<Department> Departments { get; set; } = new();
+        
         // Analytics data
         public List<string> TicketsByStatusLabels { get; set; } = new();
         public List<int> TicketsByStatusData { get; set; } = new();
-
         public List<string> TicketsByMonthLabels { get; set; } = new();
         public List<int> TicketsByMonthData { get; set; } = new();
     }

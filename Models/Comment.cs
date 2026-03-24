@@ -9,6 +9,7 @@
         public bool IsInternal { get; set; }
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
 
+        //Navigation Properties
         public virtual Ticket Ticket { get; set; } = null!;
         public virtual ApplicationUser Author { get; set; } = null!;
     }
