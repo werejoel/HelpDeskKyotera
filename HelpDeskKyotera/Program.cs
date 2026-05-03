@@ -71,9 +71,11 @@ namespace HelpDeskKyotera
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<EmailNotificationHelper>();
             builder.Services.AddScoped<IChatService, ChatService>();
             builder.Services.AddSignalR();
             builder.Services.AddHttpClient();
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<ILocationService, LocationService>();
             builder.Services.AddSingleton<ISmsSender, TwilioSmsSender>();
             builder.Services.AddScoped<IRoleService, RoleService>();
