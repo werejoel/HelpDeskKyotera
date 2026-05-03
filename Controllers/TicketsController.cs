@@ -17,12 +17,18 @@ namespace HelpDeskKyotera.Controllers
         private readonly ITicketService _ticketService;
         private readonly ApplicationDbContext _context;
         private readonly ILogger<TicketsController> _logger;
+        private readonly EmailNotificationHelper _emailNotificationHelper;
 
-        public TicketsController(ITicketService ticketService, ApplicationDbContext context, ILogger<TicketsController> logger)
+        public TicketsController(
+            ITicketService ticketService, 
+            ApplicationDbContext context, 
+            ILogger<TicketsController> logger,
+            EmailNotificationHelper emailNotificationHelper)
         {
             _ticketService = ticketService;
             _context = context;
             _logger = logger;
+            _emailNotificationHelper = emailNotificationHelper;
         }
         private Guid GetCurrentUserId() => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? Guid.Empty.ToString());
         // GET: Tickets/Index
@@ -191,6 +197,44 @@ namespace HelpDeskKyotera.Controllers
 
                 if (success)
                 {
+                    // Send email notification to admins
+                    try
+                    {
+                        var admins = await _context.Users
+                            .Where(u => u.IsActive && !string.IsNullOrEmpty(u.Email))
+                            .Join(_context.UserRoles,
+                                user => user.Id,
+                                userRole => userRole.UserId,
+                                (user, userRole) => new { User = user, UserRole = userRole })
+                            .Join(_context.Roles,
+                                ur => ur.UserRole.RoleId,
+                                role => role.Id,
+                                (ur, role) => new { ur.User, Role = role })
+                            .Where(ur => ur.Role.Name == "Admin" || ur.Role.Name == "Ceo")
+                            .Select(ur => ur.User)
+                            .Distinct()
+                            .ToListAsync();
+                        
+                        var requester = await _context.Users.FindAsync(userId);
+                        var ticket = await _context.Tickets.FindAsync(ticketId);
+                        
+                        if (ticket != null && admins.Any())
+                        {
+                            await _emailNotificationHelper.SendNewTicketNotificationAsync(
+                                recipients: admins,
+                                ticketNumber: ticket.TicketNumber,
+                                title: ticket.Title,
+                                requesterName: requester?.UserName ?? "Unknown",
+                                ticketId: ticket.TicketId
+                            );
+                        }
+                    }
+                    catch (Exception emailEx)
+                    {
+                        _logger.LogError(emailEx, "Error sending ticket creation notification email");
+                        // Continue even if email fails
+                    }
+
                     TempData["Success"] = message;
                     return RedirectToAction(nameof(Details), new { id = ticketId });
                 }
@@ -313,6 +357,33 @@ namespace HelpDeskKyotera.Controllers
             {
                 var (success, message) = await _ticketService.AssignTicketAsync(id, assignedToId);
                 TempData[success ? "Success" : "Error"] = message;
+
+                // Send email notification if assignment was successful
+                if (success && assignedToId.HasValue)
+                {
+                    try
+                    {
+                        var ticket = await _context.Tickets.FindAsync(id);
+                        var assignedUser = await _context.Users.FindAsync(assignedToId.Value);
+                        var currentUser = await _context.Users.FindAsync(GetCurrentUserId());
+                        
+                        if (ticket != null && assignedUser != null && currentUser != null && !string.IsNullOrEmpty(assignedUser.Email))
+                        {
+                            await _emailNotificationHelper.SendTicketAssignmentNotificationAsync(
+                                assignedTo: assignedUser,
+                                ticketNumber: ticket.TicketNumber,
+                                 title: ticket.Title,
+                                assignedBy: currentUser.UserName,
+                                ticketId: ticket.TicketId
+                            );
+                        }
+                    }
+                    catch (Exception emailEx)
+                    {
+                        _logger.LogError(emailEx, "Error sending ticket assignment notification email");
+                        // Continue even if email fails
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -337,8 +408,55 @@ namespace HelpDeskKyotera.Controllers
         {
             try
             {
+                // Get ticket before update to capture old status
+                var ticket = await _context.Tickets
+                    .Include(t => t.Status)
+                    .FirstOrDefaultAsync(t => t.TicketId == id);
+
                 var (success, message) = await _ticketService.UpdateStatusAsync(id, statusId);
                 TempData[success ? "Success" : "Error"] = message;
+
+                // Send email notification if status was updated successfully
+                if (success && ticket != null)
+                {
+                    try
+                    {
+                        var newStatus = await _context.Statuses.FindAsync(statusId);
+                        var requester = await _context.Users.FindAsync(ticket.RequesterId);
+                        
+                        if (requester != null && newStatus != null && !string.IsNullOrEmpty(requester.Email))
+                        {
+                            await _emailNotificationHelper.SendTicketStatusChangeNotificationAsync(
+                                recipient: requester,
+                                ticketNumber: ticket.TicketNumber,
+                                title: ticket.Title,
+                                newStatus: newStatus.Name,
+                                ticketId: ticket.TicketId
+                            );
+                        }
+
+                        // Also notify assigned user if different from requester
+                        if (ticket.AssignedToId.HasValue && ticket.AssignedToId != ticket.RequesterId)
+                        {
+                            var assignedUser = await _context.Users.FindAsync(ticket.AssignedToId);
+                            if (assignedUser != null && newStatus != null && !string.IsNullOrEmpty(assignedUser.Email))
+                            {
+                                await _emailNotificationHelper.SendTicketStatusChangeNotificationAsync(
+                                    recipient: assignedUser,
+                                    ticketNumber: ticket.TicketNumber,
+                                    title: ticket.Title,
+                                    newStatus: newStatus.Name,
+                                    ticketId: ticket.TicketId
+                                );
+                            }
+                        }
+                    }
+                    catch (Exception emailEx)
+                    {
+                        _logger.LogError(emailEx, "Error sending status change notification email");
+                        // Continue even if email fails
+                    }
+                }
             }
             catch (Exception ex)
             {

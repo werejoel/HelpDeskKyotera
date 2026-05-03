@@ -61,10 +61,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
 
         builder.Entity<ClaimMaster>()
             .HasIndex(c => c.ClaimValue)
-            .IsUnique();
+            .IsUnique(); 
 
-        
-
+  
         builder.Entity<ApplicationUser>()
             .HasOne(u => u.Location)
             .WithMany(l => l.Users)

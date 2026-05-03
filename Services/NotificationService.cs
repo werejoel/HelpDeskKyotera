@@ -7,10 +7,12 @@ namespace HelpDeskKyotera.Services
     public class NotificationService : INotificationService
     {
         private readonly ApplicationDbContext _db;
+        private readonly IEmailService _emailService;
 
-        public NotificationService(ApplicationDbContext db)
+        public NotificationService(ApplicationDbContext db, IEmailService emailService)
         {
             _db = db;
+            _emailService = emailService;
         }
 
         public async Task CreateNotificationAsync(Guid? userId, string? email, string subject, string body, string? link = null)
@@ -29,6 +31,26 @@ namespace HelpDeskKyotera.Services
 
             _db.Notifications.Add(n);
             await _db.SaveChangesAsync();
+        }
+
+        public async Task CreateNotificationAndSendEmailAsync(Guid? userId, string? email, string subject, string body, string? link = null)
+        {
+            // Create the notification in database
+            await CreateNotificationAsync(userId, email, subject, body, link);
+
+            // Send email if email address is provided
+            if (!string.IsNullOrEmpty(email))
+            {
+                try
+                {
+                    await _emailService.SendHtmlEmailAsync(email, subject, body);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sending email notification: {ex.Message}");
+                    // Continue even if email fails, notification is already saved
+                }
+            }
         }
 
         public async Task<IList<Notification>> GetUserNotificationsAsync(Guid userId, int limit = 10)
