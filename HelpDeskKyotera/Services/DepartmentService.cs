@@ -171,6 +171,24 @@ namespace HelpDeskKyotera.Services
             }
         }
 
+        public async Task<IEnumerable<ApplicationUser>> GetAllActiveUsersAsync()
+        {
+            try
+            {
+                return await _context.Users
+                    .Where(u => u.IsActive)
+                    .OrderBy(u => u.FirstName)
+                    .ThenBy(u => u.LastName)
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving active users");
+                return Enumerable.Empty<ApplicationUser>();
+            }
+        }
+
         public async Task<(bool Success, string Message)> AssignUserToDepartmentAsync(Guid userId, Guid departmentId)
         {
             try
