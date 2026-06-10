@@ -14,6 +14,7 @@ namespace HelpDeskKyotera.Services
 
         // Department Users
         Task<IEnumerable<ApplicationUser>> GetDepartmentUsersAsync(Guid departmentId);
+        Task<IEnumerable<ApplicationUser>> GetAllActiveUsersAsync();
         Task<(bool Success, string Message)> AssignUserToDepartmentAsync(Guid userId, Guid departmentId);
         Task<(bool Success, string Message)> RemoveUserFromDepartmentAsync(Guid userId);
 

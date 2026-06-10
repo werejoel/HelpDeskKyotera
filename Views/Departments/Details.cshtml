@@ -1,7 +1,9 @@
-﻿@model HelpDeskKyotera.Models.Department
+﻿@using System.Linq
+@model HelpDeskKyotera.Models.Department
 
 @{
     ViewData["Title"] = Model?.Name ?? "Department Details";
+    var users = ViewBag.Users as IEnumerable<HelpDeskKyotera.Models.ApplicationUser> ?? Enumerable.Empty<HelpDeskKyotera.Models.ApplicationUser>();
 }
 
 <div class="container mt-4">
@@ -57,11 +59,11 @@
                 </div>
             </div>
 
-            @if (ViewBag.Users != null && ((IEnumerable<HelpDeskKyotera.Models.ApplicationUser>)ViewBag.Users).Any())
+            @if (users.Any())
             {
                 <div class="card mt-4">
                     <div class="card-header bg-dark text-white">
-                        <h5 class="mb-0">Department Staff (@((IEnumerable<HelpDeskKyotera.Models.ApplicationUser>)ViewBag.Users).Count())</h5>
+                        <h5 class="mb-0">Department Staff (@users.Count())</h5>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -74,7 +76,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var user in (IEnumerable<HelpDeskKyotera.Models.ApplicationUser>)ViewBag.Users)
+                                    @foreach (var user in users)
                                     {
                                         <tr>
                                             <td>@user.FirstName @user.LastName</td>

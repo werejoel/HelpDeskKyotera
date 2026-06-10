@@ -77,6 +77,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(d => d.LocationId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        // Department → Head (ApplicationUser)
+        builder.Entity<Department>()
+            .HasOne(d => d.Head)
+            .WithMany()
+            .HasForeignKey(d => d.HeadOfDepartmentId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         // Team → TeamLead
         builder.Entity<Team>()
             .HasOne(t => t.TeamLead)

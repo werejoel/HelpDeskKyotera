@@ -59,18 +59,21 @@ namespace HelpDeskKyotera.Controllers
             }
         }
 
+        private async Task PopulateDepartmentDropdownsAsync(Guid? selectedHeadId = null, Guid? selectedLocationId = null)
+        {
+            var allUsers = await _departmentService.GetAllActiveUsersAsync();
+            ViewBag.HeadOfDepartmentId = new SelectList(allUsers, "Id", "FullName", selectedHeadId);
+
+            var locations = await _departmentService.GetAllLocationsAsync();
+            ViewBag.LocationId = new SelectList(locations, "LocationId", "Name", selectedLocationId);
+        }
+
         // GET: Departments/Create
         public async Task<IActionResult> Create()
         {
             try
             {
-                var allUsers = await Task.FromResult(new List<ApplicationUser>());
-                ViewBag.HeadOfDepartmentId = new SelectList(allUsers, "Id", "FullName");
-                
-                // Load locations for dropdown
-                var locations = await _departmentService.GetAllLocationsAsync();
-                ViewBag.LocationId = new SelectList(locations, "LocationId", "Name");
-                
+                await PopulateDepartmentDropdownsAsync();
                 return View();
             }
             catch (Exception ex)
@@ -89,11 +92,7 @@ namespace HelpDeskKyotera.Controllers
             if (string.IsNullOrWhiteSpace(name))
             {
                 ModelState.AddModelError("Name", "Department name is required.");
-                
-                // Reload locations for dropdown on error
-                var locations = await _departmentService.GetAllLocationsAsync();
-                ViewBag.LocationId = new SelectList(locations, "LocationId", "Name");
-                
+                await PopulateDepartmentDropdownsAsync(headId, locationId);
                 return View();
             }
 
@@ -108,17 +107,14 @@ namespace HelpDeskKyotera.Controllers
                 }
 
                 TempData["Error"] = message;
-                
-                // Reload locations for dropdown on error
-                var locations = await _departmentService.GetAllLocationsAsync();
-                ViewBag.LocationId = new SelectList(locations, "LocationId", "Name");
-                
+                await PopulateDepartmentDropdownsAsync(headId, locationId);
                 return View();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating department");
                 TempData["Error"] = "An unexpected error occurred.";
+                await PopulateDepartmentDropdownsAsync(headId, locationId);
                 return View();
             }
         }
@@ -135,13 +131,7 @@ namespace HelpDeskKyotera.Controllers
                 if (department == null)
                     return NotFound();
 
-                var allUsers = new List<ApplicationUser>();
-                ViewBag.HeadOfDepartmentId = new SelectList(allUsers, "Id", "FullName", department.HeadOfDepartmentId);
-                
-                // Load locations for dropdown
-                var locations = await _departmentService.GetAllLocationsAsync();
-                ViewBag.LocationId = new SelectList(locations, "LocationId", "Name", department.LocationId);
-
+                await PopulateDepartmentDropdownsAsync(department.HeadOfDepartmentId, department.LocationId);
                 return View(department);
             }
             catch (Exception ex)
@@ -160,12 +150,15 @@ namespace HelpDeskKyotera.Controllers
             if (string.IsNullOrWhiteSpace(name))
             {
                 ModelState.AddModelError("Name", "Department name is required.");
-                
-                // Reload locations for dropdown on error
-                var locations = await _departmentService.GetAllLocationsAsync();
-                ViewBag.LocationId = new SelectList(locations, "LocationId", "Name");
-                
-                return View();
+                await PopulateDepartmentDropdownsAsync(headId, locationId);
+                return View(new Department
+                {
+                    DepartmentId = id,
+                    Name = name,
+                    Description = description,
+                    HeadOfDepartmentId = headId,
+                    LocationId = locationId
+                });
             }
 
             try
@@ -179,18 +172,29 @@ namespace HelpDeskKyotera.Controllers
                 }
 
                 TempData["Error"] = message;
-                
-                // Reload locations for dropdown on error
-                var locations = await _departmentService.GetAllLocationsAsync();
-                ViewBag.LocationId = new SelectList(locations, "LocationId", "Name");
-                
-                return View();
+                await PopulateDepartmentDropdownsAsync(headId, locationId);
+                return View(new Department
+                {
+                    DepartmentId = id,
+                    Name = name,
+                    Description = description,
+                    HeadOfDepartmentId = headId,
+                    LocationId = locationId
+                });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error updating department {id}");
                 TempData["Error"] = "An unexpected error occurred.";
-                return View();
+                await PopulateDepartmentDropdownsAsync(headId, locationId);
+                return View(new Department
+                {
+                    DepartmentId = id,
+                    Name = name,
+                    Description = description,
+                    HeadOfDepartmentId = headId,
+                    LocationId = locationId
+                });
             }
         }
 
