@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HelpDeskKyotera")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+eda0c6ba704eb5e4fa0f868036de9f6b363ba951")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bf2539f96376cafa88c8187658bca0d666f3bf57")]
 [assembly: System.Reflection.AssemblyProductAttribute("HelpDeskKyotera")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HelpDeskKyotera")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
